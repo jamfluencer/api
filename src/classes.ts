@@ -1,4 +1,23 @@
 import querystring from 'node:querystring';
+import { GetPlaylistResponse, GetCurrentlyPlayingResponse } from './types';
+
+export interface Playlist {
+  name: string;
+  image: string;
+  tracks: TrackWithAddedBy[];
+}
+
+export interface Track {
+  id: string;
+  artist: string;
+  song: string;
+  album: string;
+  image: string;
+}
+
+interface TrackWithAddedBy extends Track {
+  addedBy: string;
+}
 
 export class SpotifyApi {
   private clientId: string;
@@ -56,10 +75,10 @@ export class SpotifyApi {
 
     if (response.status !== 200) throw new Error('Invalid code');
 
-    const body = await response.json();
+    const data = await response.json();
 
-    this.accessToken = body.access_token;
-    this.refreshToken = body.refresh_token;
+    this.accessToken = data.access_token;
+    this.refreshToken = data.refresh_token;
     this.resetExpiry();
   }
 
@@ -78,14 +97,14 @@ export class SpotifyApi {
       }),
     });
 
-    const body = await response.json();
+    const data = await response.json();
 
-    this.accessToken = body.access_token;
-    this.refreshToken = body.refresh_token;
+    this.accessToken = data.access_token;
+    this.refreshToken = data.refresh_token;
     this.resetExpiry();
   }
 
-  async getCurrentlyPlaying() {
+  async getCurrentlyPlaying(): Promise<Track | null> {
     if (!this.accessToken) throw new Error('Not authorized');
 
     const response = await fetch(
@@ -97,18 +116,23 @@ export class SpotifyApi {
       }
     );
 
-    const body = await response.json();
+    if (response.status === 204) return null;
+
+    const data =
+      await (response.json() as Promise<GetCurrentlyPlayingResponse>);
 
     return {
-      id: body.item.id,
-      artist: body.item.artists[0].name,
-      song: body.item.name,
-      album: body.item.album.name,
-      image: body.item.album.images[0].url,
+      id: data.item.id,
+      artist: data.item.artists.map((artist) => artist.name).join(', '),
+      song: data.item.name,
+      album: data.item.album.name,
+      image: data.item.album.images[0].url,
     };
   }
 
-  async getPlaylist(id: string) {
+  async getPlaylist(id: string): Promise<Playlist> {
+    if (!this.accessToken) throw new Error('Not authorized');
+
     const fields =
       'name,images.url,tracks.items(added_by.id,track(name,id,album(name,images),artists(name)))';
 
@@ -120,7 +144,19 @@ export class SpotifyApi {
         },
       }
     );
+    const data = await (response.json() as Promise<GetPlaylistResponse>);
 
-    return await response.json();
+    return {
+      name: data.name,
+      image: data.images[0].url,
+      tracks: data.tracks.items.map((item) => ({
+        id: item.track.id,
+        artist: item.track.artists.map((artist) => artist.name).join(', '),
+        song: item.track.name,
+        album: item.track.album.name,
+        image: item.track.album.images[2].url,
+        addedBy: item.added_by.id,
+      })),
+    };
   }
 }

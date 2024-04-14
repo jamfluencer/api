@@ -1,9 +1,13 @@
 require('dotenv').config();
 import express from 'express';
 import WebSocket, { WebSocketServer } from 'ws';
-import { SpotifyApi } from './classes';
+import { SpotifyApi, type Track } from './classes';
+import { isEqual } from 'lodash';
+import cors from 'cors';
 
 const app = express();
+app.use(cors());
+
 const port = 8888;
 const wsPort = 8080;
 const wss = new WebSocketServer({ port: wsPort });
@@ -14,29 +18,26 @@ const redirect_uri = `http://localhost:${port}/callback`;
 
 const spotifyApi = new SpotifyApi(client_id, client_secret, redirect_uri);
 
-let currentTrack = undefined;
+let currentTrack: Track | null | undefined = undefined;
+let isPolling: boolean = false;
 
 async function pollCurrentTrack() {
   const track = await spotifyApi.getCurrentlyPlaying();
-  if (!currentTrack || currentTrack.id !== track.id) {
-    currentTrack = track;
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(currentTrack));
-      }
-    });
-  }
-}
-
-function startPolling() {
-  setInterval(pollCurrentTrack, 3000);
+  if (isEqual(track, currentTrack)) return;
+  currentTrack = track;
+  wss.clients.forEach(function each(client) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(currentTrack));
+    }
+  });
 }
 
 wss.on('connection', function connection(ws) {
-  if (currentTrack) {
-    ws.send(JSON.stringify(currentTrack));
+  if (!isPolling) {
+    isPolling = true;
+    setInterval(pollCurrentTrack, 3000);
   } else {
-    startPolling();
+    ws.send(JSON.stringify(currentTrack));
   }
 });
 
