@@ -1,7 +1,7 @@
 require('dotenv').config();
 import express from 'express';
 import WebSocket, { WebSocketServer } from 'ws';
-import { SpotifyApi, type Track } from './classes';
+import { SpotifyApi, type Queue } from './classes';
 import { isEqual } from 'lodash';
 import cors from 'cors';
 
@@ -12,22 +12,22 @@ const port = 8888;
 const wsPort = 8080;
 const wss = new WebSocketServer({ port: wsPort });
 
-const client_id = process.env.SPOTIFY_CLIENT_ID;
-const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+const client_id = process.env.SPOTIFY_CLIENT_ID!;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
 const redirect_uri = `http://localhost:${port}/callback`;
 
 const spotifyApi = new SpotifyApi(client_id, client_secret, redirect_uri);
 
-let currentTrack: Track | null | undefined = undefined;
+let currentQueue: Queue | undefined;
 let isPolling: boolean = false;
 
-async function pollCurrentTrack() {
-  const track = await spotifyApi.getCurrentlyPlaying();
-  if (isEqual(track, currentTrack)) return;
-  currentTrack = track;
+async function pollCurrentQueue() {
+  const queue = await spotifyApi.getQueue();
+  if (queue.currentlyPlaying?.id === currentQueue?.currentlyPlaying?.id) return;
+  currentQueue = queue;
   wss.clients.forEach(function each(client) {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(currentTrack));
+      client.send(JSON.stringify(currentQueue));
     }
   });
 }
@@ -35,9 +35,9 @@ async function pollCurrentTrack() {
 wss.on('connection', function connection(ws) {
   if (!isPolling) {
     isPolling = true;
-    setInterval(pollCurrentTrack, 3000);
+    setInterval(pollCurrentQueue, 3000);
   } else {
-    ws.send(JSON.stringify(currentTrack));
+    ws.send(JSON.stringify(currentQueue));
   }
 });
 
@@ -89,7 +89,16 @@ app.use(async function (req, res, next) {
 app.get('/current', async function (req, res) {
   try {
     const body = await spotifyApi.getCurrentlyPlaying();
-    res.json(body);
+    res.status(body === null ? 204 : 200).json(body);
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+});
+
+app.get('/queue', async function (req, res) {
+  try {
+    const body = await spotifyApi.getQueue();
+    res.status(200).json(body);
   } catch (error) {
     res.status(500).json({ error });
   }

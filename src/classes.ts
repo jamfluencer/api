@@ -1,10 +1,16 @@
 import querystring from 'node:querystring';
 import { GetPlaylistResponse, GetCurrentlyPlayingResponse } from './types';
+import { GetQueueResponse } from './types/GetQueue';
 
 export interface Playlist {
   name: string;
   image: string;
   tracks: TrackWithAddedBy[];
+}
+
+export interface Queue {
+  currentlyPlaying: Track | null;
+  queue: Track[];
 }
 
 export interface Track {
@@ -23,9 +29,9 @@ export class SpotifyApi {
   private clientId: string;
   private clientSecret: string;
   private redirectUri: string;
-  private accessToken: string;
-  private refreshToken: string;
-  private accessTokenExpiry: number;
+  private accessToken: string | undefined;
+  private refreshToken: string | undefined;
+  private accessTokenExpiry: number | undefined;
 
   constructor(clientId: string, clientSecret: string, redirectUri: string) {
     this.clientId = clientId;
@@ -38,7 +44,8 @@ export class SpotifyApi {
   }
 
   redirectUrl() {
-    const scope = 'user-read-currently-playing playlist-read-private';
+    const scope =
+      'user-read-currently-playing user-read-playback-state playlist-read-private';
     return (
       'https://accounts.spotify.com/authorize?' +
       querystring.stringify({
@@ -156,6 +163,40 @@ export class SpotifyApi {
         album: item.track.album.name,
         image: item.track.album.images[2].url,
         addedBy: item.added_by.id,
+      })),
+    };
+  }
+
+  async getQueue(): Promise<Queue> {
+    if (!this.accessToken) throw new Error('Not authorized');
+
+    const response = await fetch('https://api.spotify.com/v1/me/player/queue', {
+      headers: {
+        Authorization: 'Bearer ' + this.accessToken,
+      },
+    });
+
+    const data = await (response.json() as Promise<GetQueueResponse>);
+    const { currently_playing, queue } = data;
+
+    return {
+      currentlyPlaying: currently_playing
+        ? {
+            id: currently_playing.id,
+            artist: currently_playing.artists
+              .map((artist) => artist.name)
+              .join(', '),
+            song: currently_playing.name,
+            album: currently_playing.album.name,
+            image: currently_playing.album.images[0].url,
+          }
+        : null,
+      queue: queue.map((track) => ({
+        id: track.id,
+        artist: track.artists.map((artist) => artist.name).join(', '),
+        song: track.name,
+        album: track.album.name,
+        image: track.album.images[2].url,
       })),
     };
   }
