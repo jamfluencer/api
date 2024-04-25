@@ -7,8 +7,7 @@ phases:
       - npm install
   build:
     commands:
-      - npm run prod
-      - npm run prod
+      - npm run build
 artifacts:
   files: '**/*'
   name: jamfluencer-api-$(date +%Y-%m-%d)
