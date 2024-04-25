@@ -11,3 +11,5 @@ phases:
 artifacts:
   files: '**/*'
   name: jamfluencer-api-$(date +%Y-%m-%d)
+  exclude-paths:
+    - "**/.*"
