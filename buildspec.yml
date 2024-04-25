@@ -1,0 +1,14 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - composer install
+      - npm install
+  build:
+    commands:
+      - npm run prod
+      - npm run prod
+artifacts:
+  files: '**/*'
+  name: jamfluencer-api-$(date +%Y-%m-%d)

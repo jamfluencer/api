@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /usr/share/nginx/jamfluencer/api
+permissions:
+  - object: /usr/share/nginx
+    owner: nginx
+    group: nginx
+    mode: 775
+hooks:
+  BeforeInstall:
+    - location: codeDeploy/beforeInstall.sh
+  AfterInstall:
+    - location: codeDeploy/afterInstall.sh
