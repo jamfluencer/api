@@ -2,6 +2,7 @@
 
 namespace App\Spotify;
 
+use App\Playback\SpotifyToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
@@ -17,13 +18,13 @@ class Spotify
         private readonly string $secret
     ) {
         $this->http = Http::withHeaders([
-            'Authorization' => 'Bearer ',
+            'Authorization' => 'Bearer '.SpotifyToken::find(1)->token,
         ])
             ->baseUrl('https://api.spotify.com')
             ->throw();
     }
 
-    public function authUrl(): string
+    public function authUrl(string $redirectPath): string
     {
         return URL::query(
             'https://accounts.spotify.com/authorize',
@@ -31,7 +32,7 @@ class Spotify
                 'response_type' => 'code',
                 'client_id' => $this->id,
                 'scope' => 'user-read-currently-playing user-read-playback-state playlist-read-private',
-                'redirect_uri' => URL::to('api/v1/auth/spotify/callback'),
+                'redirect_uri' => URL::to($redirectPath),
                 'state' => Str::random(),
             ]
         );
@@ -49,7 +50,7 @@ class Spotify
                 [
                     'grant_type' => 'authorization_code',
                     'code' => $authorizationCode,
-                    'redirect_uri' => URL::to('api/v1/auth/spotify/callback'),
+                    'redirect_uri' => URL::to('/v1/auth/spotify/callback'),
                 ]
             )
             ->throw();
@@ -57,6 +58,30 @@ class Spotify
         return new AccessToken(
             token: $response->json('access_token'),
             refresh: $response->json('refresh_token'),
+            expiry: $response->json('expires_in'),
+            scopes: $response->json('scope')
+        );
+    }
+
+    public function refreshToken(AccessToken $token): AccessToken
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ])
+            ->asForm()
+            ->post(
+                'https://accounts.spotify.com/api/token',
+                [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $token->refresh,
+                ]
+            )
+            ->throw();
+
+        return new AccessToken(
+            token: $response->json('access_token'),
+            refresh: $response->json('refresh_token', $token->refresh),
             expiry: $response->json('expires_in'),
             scopes: $response->json('scope')
         );
