@@ -31,7 +31,7 @@ class Spotify
                 'response_type' => 'code',
                 'client_id' => $this->id,
                 'scope' => 'user-read-currently-playing user-read-playback-state playlist-read-private',
-                'redirect_uri' => URL::to('/auth/spotify/callback'),
+                'redirect_uri' => URL::to('api/v1/auth/spotify/callback'),
                 'state' => Str::random(),
             ]
         );
@@ -49,7 +49,7 @@ class Spotify
                 [
                     'grant_type' => 'authorization_code',
                     'code' => $authorizationCode,
-                    'redirect_uri' => URL::to('/auth/spotify/callback'),
+                    'redirect_uri' => URL::to('api/v1/auth/spotify/callback'),
                 ]
             )
             ->throw();
