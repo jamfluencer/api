@@ -9,7 +9,7 @@ Route::get('/', fn () => response()->json(['status' => 'OK']));
 
 Route::get(
     '/auth/google',
-    fn () => Socialite::driver('google')->redirect()
+    fn () => response()->json(['url'=>Socialite::driver('google')->redirect()->getTargetUrl()])
 );
 Route::get('/auth/google/callback', function () {
     $google = Socialite::driver('google')->user();
