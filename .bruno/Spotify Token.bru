@@ -1,0 +1,21 @@
+meta {
+  name: Spotify Token
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{url_web}}/v1/spotify/auth
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "code": "AQAqgyGOosw-Xl1SOEgzXhBgst5Nt2l65vJ6E_ywPE-04pdNdLGkH4QA_CnXTC438p7ZDqP3YQIblhRaQwdyuzlKx6jtGzKX0mOSNLKieWTzgbcyNLWVjKnM1CuDRgufNY6BM68QFetTagmn8sSGBDSpoRa52EcWAglv_k63sLr-vh1hXQh9IO2T_cUUZM49icqUhj2pd-03-lvnQGOgq5uxIcPN7-iq3acWFq2LFyuMfy4kYyCoyu9iKXbAvN-Gvz27fKpSpX3-ywbHCqO-cg14mk5z0NuAEFgnr8jrOg"
+  }
+}
