@@ -2,7 +2,6 @@
 
 namespace App\Spotify;
 
-use App\Playback\SpotifyToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
@@ -17,11 +16,6 @@ class Spotify
         private readonly string $id,
         private readonly string $secret
     ) {
-        $this->http = Http::withHeaders([
-            'Authorization' => 'Bearer '.SpotifyToken::find(1)->token,
-        ])
-            ->baseUrl('https://api.spotify.com')
-            ->throw();
     }
 
     public function authUrl(string $redirectPath): string
@@ -52,8 +46,7 @@ class Spotify
                     'code' => $authorizationCode,
                     'redirect_uri' => URL::to('https://jamfluencer.app/auth/spotify/callback'),
                 ]
-            )
-            ->throw();
+            );
 
         return new AccessToken(
             token: $response->json('access_token'),
@@ -76,8 +69,7 @@ class Spotify
                     'grant_type' => 'refresh_token',
                     'refresh_token' => $token->refresh,
                 ]
-            )
-            ->throw();
+            );
 
         return new AccessToken(
             token: $response->json('access_token'),
@@ -106,5 +98,18 @@ class Spotify
     public function queue(): Queue
     {
         return new Queue;
+    }
+
+    public function setToken(AccessToken $token): self
+    {
+        $this->client()->replaceHeaders(['Authorization' => "Bearer {$token->token}"]);
+
+        return $this;
+    }
+
+    private function client(): PendingRequest
+    {
+        return $this->http ??= Http::baseUrl('https://api.spotify.com')
+            ->throw();
     }
 }
