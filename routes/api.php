@@ -12,4 +12,5 @@ Route::prefix('v1')->group(function () {
         return response()->noContent();
     })
         ->middleware(['auth:sanctum']);
+    Route::get('/me', fn (Request $request) => $request->user())->middleware(['auth:sanctum']);
 });

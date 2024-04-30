@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -9,18 +11,19 @@ Route::get('/', fn () => response()->json(['status' => 'OK']));
 
 Route::get(
     '/auth/google',
-    fn () => response()->json(['url'=>Socialite::driver('google')->redirect()->getTargetUrl()])
+    fn (): JsonResponse => response()
+        ->json(['url'=>Socialite::driver('google')->stateless()->redirect()->getTargetUrl()])
 );
-Route::get('/auth/google/callback', function () {
-    $google = Socialite::driver('google')->user();
+Route::post('/auth/google', function (Request $request): JsonResponse {
+    $request->validate([
+        'code'=>['required','string']
+    ]);
+    $google = Socialite::driver('google')->stateless()->user();
 
-    /** @noinspection PhpParamsInspection */
-    Auth::login(User::query()->firstOrCreate(
+    return response()->json(['token'=>tap(User::query()->firstOrCreate(
         [
             'email' => $google->getEmail(),
         ],
         ['email_verified_at' => now()]
-    ));
-
-    return redirect('https://influencer.app/');
-});
+    ), fn (User $user) => $user->update(['name'=>$google->getName()]))->createToken('api')->plainTextToken]);
+})->withoutMiddleware(VerifyCsrfToken::class);
