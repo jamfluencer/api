@@ -5,7 +5,11 @@ meta {
 }
 
 get {
-  url: {{url_web}}/auth/google
+  url: {{url_web}}/auth/google?redirect=https://jamfluencer.app/auth/google/callback
   body: none
   auth: none
+}
+
+query {
+  redirect: https://jamfluencer.app/auth/google/callback
 }
