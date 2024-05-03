@@ -90,14 +90,26 @@ class Spotify
         return Track::fromSpotify($response->json('item', []));
     }
 
-    public function playlist(): Playlist
+    public function playlist(string $id): ?Playlist
     {
-        return new Playlist;
+        $response = $this->http->get("/v1/playlists/{$id}?id,name,images(url),tracks.items(track(id,name,artists,album(id,name,images)))");
+
+        if ($response->status() === Response::HTTP_NO_CONTENT) {
+            return null;
+        }
+
+        return Playlist::fromSpotify($response->json());
     }
 
-    public function queue(): Queue
+    public function queue(): ?Queue
     {
-        return new Queue;
+        $response = $this->http->get('/v1/me/player/queue');
+
+        if ($response->status() === Response::HTTP_NO_CONTENT) {
+            return null;
+        }
+
+        return Queue::fromSpotify($response->json());
     }
 
     public function setToken(AccessToken $token): self

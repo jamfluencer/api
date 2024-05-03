@@ -1,0 +1,15 @@
+meta {
+  name: Current Queue
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{v1}}/spotify/player/queue
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}

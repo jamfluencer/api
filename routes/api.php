@@ -40,8 +40,8 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         return response()->json($track);
     });
 
-    Route::get('/spotify/player/playlist', function (Request $request): JsonResponse {
-        $track = Spotify::setToken(
+    Route::get('/spotify/player/queue', function (Request $request): JsonResponse {
+        $queue = Spotify::setToken(
             $request->user()->spotifyToken->forSpotify()->expired()
                 ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
                 fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
@@ -50,8 +50,23 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
                 ]))
                 : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
         )
-            ->currentlyPlaying();
+            ->queue();
 
-        return response()->json($track);
+        return response()->json($queue);
+    });
+
+    Route::get('/spotify/playlist/{id}', function (Request $request, string $id): JsonResponse {
+        $playlist = Spotify::setToken(
+            $request->user()->spotifyToken->forSpotify()->expired()
+                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
+                fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
+                    'token' => $refreshed->token,
+                    'refresh' => $refreshed->refresh,
+                ]))
+                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
+        )
+            ->playlist($id);
+
+        return response()->json($playlist);
     });
 });
