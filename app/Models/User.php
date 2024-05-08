@@ -35,11 +35,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'spotifyToken'
+        'spotifyToken',
     ];
 
     protected $appends = [
-        'has_spotify'
+        'has_spotify',
     ];
 
     /**

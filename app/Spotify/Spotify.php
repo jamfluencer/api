@@ -20,12 +20,20 @@ class Spotify
 
     public function authUrl(string $redirectPath): string
     {
+        $scopes = [
+            'user-read-currently-playing',
+            'user-read-playback-state',
+            'playlist-read-private',
+            'playlist-read-collaborative',
+            'user-modify-playback-state',
+        ];
+
         return URL::query(
             'https://accounts.spotify.com/authorize',
             [
                 'response_type' => 'code',
                 'client_id' => $this->id,
-                'scope' => 'user-read-currently-playing user-read-playback-state playlist-read-private',
+                'scope' => implode(' ', $scopes),
                 'redirect_uri' => URL::to($redirectPath),
                 'state' => Str::random(),
             ]
@@ -117,6 +125,20 @@ class Spotify
         $this->client()->replaceHeaders(['Authorization' => "Bearer {$token->token}"]);
 
         return $this;
+    }
+
+    public function play(?string $uri = null): Track
+    {
+        $this->http->put('/v1/me/player/play', array_filter([
+            'context_uri' => $uri,
+        ]));
+
+        return $this->currentlyPlaying();
+    }
+
+    public function pause(): bool
+    {
+        return $this->http->put('/v1/me/player/pause')->successful();
     }
 
     private function client(): PendingRequest

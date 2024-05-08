@@ -11,6 +11,7 @@ readonly class AccessToken
     public Collection $scopes;
 
     public string $type;
+
     public DateTime $expiresAt;
 
     public function __construct(

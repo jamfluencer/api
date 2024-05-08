@@ -14,7 +14,7 @@ class SpotifyToken extends Model
     ];
 
     protected $casts = [
-        'expires_at'=>'datetime'
+        'expires_at' => 'datetime',
     ];
 
     public function forSpotify(): AccessToken

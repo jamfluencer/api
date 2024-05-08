@@ -7,8 +7,9 @@ class Queue
     public function __construct(
         public readonly Track $currently_playing,
         public readonly array $queue
-    )
-    {}
+    ) {
+    }
+
     public static function fromSpotify(array $spotify): self
     {
         return new self(
