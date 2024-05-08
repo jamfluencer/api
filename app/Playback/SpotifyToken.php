@@ -2,8 +2,10 @@
 
 namespace App\Playback;
 
+use App\Models\User;
 use App\Spotify\AccessToken;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SpotifyToken extends Model
 {
@@ -25,5 +27,10 @@ class SpotifyToken extends Model
             scopes: $this->scope,
             expiry: $this->expires_at,
         );
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

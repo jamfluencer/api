@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use App\Spotify\AccessToken;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
@@ -13,12 +14,13 @@ use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
-    Route::get('/spotify/auth', fn () => response()
+    Route::get('/spotify/auth', fn() => response()
         ->json(['url' => Spotify::authUrl('https://jamfluencer.app/auth/spotify/callback')]));
 
     Route::post('/spotify/auth', function (Request $request) {
         $request->validate(['code' => ['required', 'string']]);
         $token = Spotify::accessToken($request->input('code'));
+        $request->user()->spotifyToken()->delete();
         $request->user()->spotifyToken()->create([
             'token' => $token->token,
             'scope' => $token->scopes->implode(','),
@@ -29,21 +31,13 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         return response()->noContent();
     });
 
-    Route::get('/me', fn (Request $request) => $request->user());
+    Route::get('/me', fn(Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (Request $request): JsonResponse {
         if (Cache::has('jam') === false) {
             return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
-        $track = Spotify::setToken(
-            $request->user()->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
-        )
+        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->currentlyPlaying();
 
         return response()->json($track);
@@ -53,15 +47,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         if (Cache::has('jam') === false) {
             return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
-        $queue = Spotify::setToken(
-            $request->user()->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
-        )
+        $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->queue();
 
         return response()->json($queue);
@@ -71,15 +57,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         if (Cache::has('jam') === false) {
             return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
-        $playlist = Spotify::setToken(
-            $request->user()->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
-        )
+        $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->playlist($id);
 
         return response()->json($playlist);
@@ -90,15 +68,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No valid Spotify token for authenticated user.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $spotify = Spotify::setToken(
-            $request->user()->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
-        );
+        $spotify = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken);
         $track = $spotify->play($playlist);
 
         Cache::put(
@@ -125,15 +95,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No valid Spotify token for authenticated user.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        Spotify::setToken(
-            $request->user()->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($request->user()->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $request->user()->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($request->user()->spotifyToken->forSpotify())
-        )->pause();
+        Spotify::setToken($request->user()->spotifyToken)->pause();
 
         Cache::forget('jam');
 

@@ -2,6 +2,7 @@
 
 namespace App\Spotify;
 
+use App\Playback\SpotifyToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
@@ -15,7 +16,8 @@ class Spotify
     public function __construct(
         private readonly string $id,
         private readonly string $secret
-    ) {
+    )
+    {
     }
 
     public function authUrl(string $redirectPath): string
@@ -43,7 +45,7 @@ class Spotify
     public function accessToken(string $authorizationCode): AccessToken
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
+            'Authorization' => 'Basic ' . base64_encode("{$this->id}:{$this->secret}"),
             'Content-Type' => 'application/x-www-form-urlencoded',
         ])
             ->asForm()
@@ -67,7 +69,7 @@ class Spotify
     public function refreshToken(AccessToken $token): AccessToken
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
+            'Authorization' => 'Basic ' . base64_encode("{$this->id}:{$this->secret}"),
             'Content-Type' => 'application/x-www-form-urlencoded',
         ])
             ->asForm()
@@ -120,8 +122,16 @@ class Spotify
         return Queue::fromSpotify($response->json());
     }
 
-    public function setToken(AccessToken $token): self
+    public function setToken(SpotifyToken $token): self
     {
+        if ($token->forSpotify()->expired()) {
+            $accessToken = Spotify::refreshToken($token->forSpotify());
+            $token->update([
+                'token' => $accessToken->token,
+                'refresh' => $accessToken->refresh,
+            ]);
+        }
+
         $this->client()->replaceHeaders(['Authorization' => "Bearer {$token->token}"]);
 
         return $this;
