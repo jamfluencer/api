@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
@@ -33,7 +34,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/me', fn(Request $request) => $request->user());
 
-    Route::get('/spotify/player/track', function (Request $request): JsonResponse {
+    Route::get('/spotify/player/track', function (): JsonResponse {
         if (Cache::has('jam') === false) {
             return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
@@ -43,7 +44,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         return response()->json($track);
     });
 
-    Route::get('/spotify/player/queue', function (Request $request): JsonResponse {
+    Route::get('/spotify/player/queue', function (): JsonResponse {
         if (Cache::has('jam') === false) {
             return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
         }
@@ -68,7 +69,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No valid Spotify token for authenticated user.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $spotify = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken);
+        $spotify = Spotify::setToken($request->user()->spotifyToken);
         $track = $spotify->play($playlist);
 
         Cache::put(
@@ -80,10 +81,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             60 * 60 * 8
         );
 
-        JamStarted::dispatch(
-            $spotify->playlist(Arr::last(explode(':', $playlist))),
-            $spotify->queue()
-        );
+        JamStarted::dispatch();
 
         PollJam::dispatchAfterResponse();
 
@@ -102,5 +100,23 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         JamEnded::dispatch();
 
         return response()->json(status: Response::HTTP_ACCEPTED);
+    });
+
+    Route::get('/jam/playlist', function() {
+        if (Cache::has('jam') === false) {
+            return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+            ->playlist(Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist', ''),':')));
+    });
+
+    Route::get('/jam/queue', function() {
+        if (Cache::has('jam') === false) {
+            return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+            ->queue());
     });
 });

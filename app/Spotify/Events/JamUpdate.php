@@ -2,20 +2,15 @@
 
 namespace App\Spotify\Events;
 
-use App\Spotify\Queue;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class QueueUpdate implements ShouldBroadcast
+class JamUpdate implements ShouldBroadcast
 {
     use Dispatchable;
     use InteractsWithSockets;
-
-    public function __construct(private readonly Queue $queue)
-    {
-    }
 
     public function broadcastOn(): array
     {
@@ -27,10 +22,5 @@ class QueueUpdate implements ShouldBroadcast
     public function broadcastAs(): string
     {
         return 'jam.update';
-    }
-
-    public function broadcastWith(): array
-    {
-        return (array) $this->queue;
     }
 }

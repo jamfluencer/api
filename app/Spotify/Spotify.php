@@ -142,6 +142,7 @@ class Spotify
         $this->http->put('/v1/me/player/play', array_filter([
             'context_uri' => $uri,
         ]));
+        usleep(500_000);
 
         return $this->currentlyPlaying();
     }

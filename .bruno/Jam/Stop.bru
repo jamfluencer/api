@@ -1,0 +1,15 @@
+meta {
+  name: Stop
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{v1}}/jam/stop
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}

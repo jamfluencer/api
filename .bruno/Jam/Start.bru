@@ -1,0 +1,19 @@
+meta {
+  name: Start
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{v1}}/jam/start/{{playlist}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+vars:pre-request {
+  playlist: spotify:playlist:7vZgyz5NgCzeZv5EezzATc?si=a6a2b125856b4760
+}
