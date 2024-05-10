@@ -109,7 +109,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
         return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->playlist(Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist', ''),':')));
-    });
+    })->withoutMiddleware(['auth:sanctum']);
 
     Route::get('/jam/queue', function() {
         if (Cache::has('jam') === false) {
@@ -118,5 +118,5 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
         return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->queue());
-    });
+    })->withoutMiddleware(['auth:sanctum']);
 });
