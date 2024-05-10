@@ -4,7 +4,7 @@ namespace App\Spotify\Jobs;
 
 use App\Models\User;
 use App\Spotify\AccessToken;
-use App\Spotify\Events\QueueUpdate;
+use App\Spotify\Events\JamUpdate;
 use App\Spotify\Facades\Spotify;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,15 +26,7 @@ class PollJam implements ShouldQueue
 
         $user = User::query()->findOrFail(Arr::get(Cache::get('jam', []), 'user'));
 
-        $queue = Spotify::setToken(
-            $user->spotifyToken->forSpotify()->expired()
-                ? tap(Spotify::refreshToken($user->spotifyToken->forSpotify()),
-                    fn (AccessToken $refreshed) => $user->spotifyToken->update([
-                        'token' => $refreshed->token,
-                        'refresh' => $refreshed->refresh,
-                    ]))
-                : Spotify::refreshToken($user->spotifyToken->forSpotify())
-        )->queue();
+        $queue = Spotify::setToken($user->spotifyToken)->queue();
 
         if ($queue === null) {
             Cache::forget('jam');
@@ -43,8 +35,8 @@ class PollJam implements ShouldQueue
         }
 
         if ($queue?->currently_playing?->id !== Arr::get(Cache::get('jam', []), 'currently_playing')) {
-            QueueUpdate::dispatch($queue);
-            Cache::put('jam', array_merge(Cache::get('jam') + ['currently_playing' => $queue->currently_playing->id]));
+            JamUpdate::dispatch();
+            Cache::put('jam', array_merge(Cache::get('jam'),['currently_playing' => $queue->currently_playing->id]));
         }
 
         self::dispatch()->delay(now()->addSeconds(3));
