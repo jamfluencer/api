@@ -7,5 +7,6 @@ readonly class Filter
     public function __construct(
         public bool $enabled,
         public bool $locked
-    ){}
+    ) {
+    }
 }

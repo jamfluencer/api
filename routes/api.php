@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
-    Route::get('/spotify/auth', fn() => response()
+    Route::get('/spotify/auth', fn () => response()
         ->json(['url' => Spotify::authUrl('https://jamfluencer.app/auth/spotify/callback')]));
 
     Route::post('/spotify/auth', function (Request $request) {
@@ -41,13 +41,13 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
                     'country' => $account->country,
                 ]
             ),
-            fn(SpotifyAccount $account) => $account->token()->delete())
+            fn (SpotifyAccount $account) => $account->token()->delete())
             ->token()->save($token);
 
         return response()->noContent();
     });
 
-    Route::get('/me', fn(Request $request) => $request->user());
+    Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
         if (Cache::has('jam') === false) {

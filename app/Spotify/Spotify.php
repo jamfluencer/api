@@ -16,8 +16,7 @@ class Spotify
     public function __construct(
         private readonly string $id,
         private readonly string $secret
-    )
-    {
+    ) {
     }
 
     public function authUrl(string $redirectPath): string
@@ -45,7 +44,7 @@ class Spotify
     public function accessToken(string $authorizationCode): AccessToken
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic ' . base64_encode("{$this->id}:{$this->secret}"),
+            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
             'Content-Type' => 'application/x-www-form-urlencoded',
         ])
             ->asForm()
@@ -69,7 +68,7 @@ class Spotify
     public function refreshToken(AccessToken $token): AccessToken
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Basic ' . base64_encode("{$this->id}:{$this->secret}"),
+            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
             'Content-Type' => 'application/x-www-form-urlencoded',
         ])
             ->asForm()

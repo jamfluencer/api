@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class SpotifyAccount extends Model
 {
     protected $keyType = 'string';
+
     public $fillable = [
         'country',
         'id',
-        'display_name'
+        'display_name',
     ];
 
     public function token(): HasOne

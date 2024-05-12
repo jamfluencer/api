@@ -2,7 +2,6 @@
 
 namespace App\Playback;
 
-use App\Models\User;
 use App\Spotify\AccessToken;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
