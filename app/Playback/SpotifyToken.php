@@ -29,8 +29,8 @@ class SpotifyToken extends Model
         );
     }
 
-    public function user(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(SpotifyAccount::class);
     }
 }

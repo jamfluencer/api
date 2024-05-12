@@ -111,6 +111,13 @@ class Spotify
         return Playlist::fromSpotify($response->json());
     }
 
+    public function profile(?string $id = null): Profile
+    {
+        return new Profile(...$this->http->get(
+            $id === null ? '/v1/me' : "/v1/users/{$id}"
+        )->json());
+    }
+
     public function queue(): ?Queue
     {
         $response = $this->http->get('/v1/me/player/queue');
