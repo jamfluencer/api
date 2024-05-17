@@ -3,6 +3,7 @@
 namespace App\Spotify\Jobs;
 
 use App\Models\User;
+use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamUpdate;
 use App\Spotify\Facades\Spotify;
 use Illuminate\Bus\Queueable;
@@ -29,11 +30,12 @@ class PollJam implements ShouldQueue
 
         if ($queue === null) {
             Cache::forget('jam');
+            JamEnded::broadcast();
 
             return;
         }
 
-        if ($queue?->currently_playing?->id !== Arr::get(Cache::get('jam', []), 'currently_playing')) {
+        if ($queue->currently_playing?->id !== Arr::get(Cache::get('jam', []), 'currently_playing')) {
             JamUpdate::dispatch();
             Cache::put('jam', array_merge(Cache::get('jam'), ['currently_playing' => $queue->currently_playing->id]));
         }
