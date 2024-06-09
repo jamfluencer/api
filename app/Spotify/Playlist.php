@@ -2,13 +2,15 @@
 
 namespace App\Spotify;
 
-class Playlist
+readonly class Playlist
 {
     public function __construct(
-        public readonly string $name,
-        public readonly string $id,
-        public readonly array $images,
-        public readonly array $tracks,
+        public string $name,
+        public string $id,
+        public array $images,
+        public array $tracks,
+        public int $totalTracks,
+        public ?string $next
     ) {
     }
 
@@ -19,6 +21,20 @@ class Playlist
             id: $spotify['id'],
             images: array_map(fn (array $image) => new Image(...$image), $spotify['images']),
             tracks: array_map(fn (array $track) => Track::fromSpotify($track), $spotify['tracks']['items'] ?? []),
+            totalTracks: $spotify['tracks']['total'],
+            next: $spotify['tracks']['next']??null,
+        );
+    }
+
+    public function extend(array $tracks, ?string $next = null): self
+    {
+        return new self(
+            name: $this->name,
+            id: $this->id,
+            images: $this->images,
+            tracks: $this->tracks + $tracks,
+            totalTracks: $this->totalTracks,
+            next: $next
         );
     }
 }

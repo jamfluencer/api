@@ -5,15 +5,15 @@ meta {
 }
 
 get {
-  url: {{v1}}/spotify/playlists/{{id}}
+  url: {{v1}}/spotify/playlists/{{id}}?complete=yes
   body: none
-  auth: none
+  auth: inherit
 }
 
-headers {
-  Authorization: Bearer {{token}}
+query {
+  complete: yes
 }
 
 vars:pre-request {
-  id: 5REttHsnZVG6OewRx6XHfC
+  id: 4nHyJTZ6fQw2iLSWOdVGU1
 }

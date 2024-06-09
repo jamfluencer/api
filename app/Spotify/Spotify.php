@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Spotify
 {
+    private const BASE_URL = 'https://api.spotify.com';
+
     private readonly PendingRequest $http;
 
     public function __construct(
@@ -53,7 +55,7 @@ class Spotify
                 [
                     'grant_type' => 'authorization_code',
                     'code' => $authorizationCode,
-                    'redirect_uri' => URL::to('https://jamfluencer.app/auth/spotify/callback'),
+                    'redirect_uri' => URL::to('https://localhost:3000/auth/spotify/callback'),
                 ]
             );
 
@@ -99,15 +101,38 @@ class Spotify
         return Track::fromSpotify($response->json('item', []));
     }
 
-    public function playlist(string $id): ?Playlist
+    public function playlist(string $id, bool $complete = false): ?Playlist
     {
-        $response = $this->http->get("/v1/playlists/{$id}?id,name,images(url),tracks.items(track(id,name,artists,album(id,name,images)))");
+        $response = $this->http->get("/v1/playlists/{$id}?fields=id,name,images,tracks(total,next,items(added_by,track(id,name,artists,duration_ms,album(id,name,images))))");
 
         if ($response->status() === Response::HTTP_NO_CONTENT) {
             return null;
         }
 
-        return Playlist::fromSpotify($response->json());
+        $playlist = Playlist::fromSpotify($response->json());
+        while ($playlist->next && $complete) {
+            $additional = $this->http->get(
+                Str::after(
+                    $this->trackUrlFromPlaylistUrl($playlist->next),
+                    self::BASE_URL)
+            );
+            $playlist = $playlist->extend(
+                array_map(fn (array $track) => Track::fromSpotify($track), $additional->json('items', [])),
+                $additional->json('next')
+            );
+        }
+
+        return $playlist;
+    }
+
+    private function trackUrlFromPlaylistUrl(string $playlistUrl): string
+    {
+        $components = parse_url($playlistUrl);
+        parse_str($components['query'] ?? '', $query);
+        $query['fields'] = 'next,items(added_by,track(id,name,artists,duration_ms,album(id,name,images)))';
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
     }
 
     public function profile(?string $id = null): Profile
@@ -160,7 +185,7 @@ class Spotify
 
     private function client(): PendingRequest
     {
-        return $this->http ??= Http::baseUrl('https://api.spotify.com')
+        return $this->http ??= Http::baseUrl(self::BASE_URL)
             ->throw();
     }
 }
