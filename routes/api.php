@@ -7,11 +7,13 @@ use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Jobs\PollJam;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
@@ -86,7 +88,11 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         }
 
         $spotify = Spotify::setToken($request->user()->spotifyToken);
-        $track = $spotify->play($playlist);
+        try {
+            $track = $spotify->play($playlist);
+        } catch (RequestException $exception) {
+            return  response()->json($exception->response->json(), $exception->getCode());
+        }
 
         Cache::put(
             'jam',
@@ -125,7 +131,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        return redirect('/spotify/playlists/' . Arr::get(Cache::get('jam', []), 'playlist'));
+        return redirect('/v1/spotify/playlists/' . Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'),':'));
     }
     )->withoutMiddleware(['auth:sanctum']);
 
