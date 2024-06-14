@@ -77,7 +77,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         }
         try {
             $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
-                ->playlist($id, $request->boolean('complete'));
+                ->playlist($id, $request->boolean('complete', true));
         } catch (TypeError) {
             throw new RuntimeException('No Spotify authorization for user.');
         }
