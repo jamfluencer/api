@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/spotify/auth', fn () => response()
-        ->json(['url' => Spotify::authUrl('https://localhost:3000/auth/spotify/callback')]));
+        ->json(['url' => Spotify::authUrl('https://jamfluencer.app/auth/spotify/callback')]));
 
     Route::post('/spotify/auth', function (Request $request) {
         $request->validate(['code' => ['required', 'string']]);
