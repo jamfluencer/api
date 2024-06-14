@@ -32,7 +32,7 @@ readonly class Playlist
             name: $this->name,
             id: $this->id,
             images: $this->images,
-            tracks: $this->tracks + $tracks,
+            tracks: array_merge($this->tracks, $tracks),
             totalTracks: $this->totalTracks,
             next: $next
         );

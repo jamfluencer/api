@@ -77,7 +77,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         }
         try {
             $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
-                ->playlist($id, $request->boolean('complete', true));
+                ->playlist($id, $request->boolean('complete'));
         } catch (TypeError) {
             throw new RuntimeException('No Spotify authorization for user.');
         }
@@ -134,7 +134,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        return redirect('/v1/spotify/playlists/' . Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'),':'));
+        return redirect('/v1/spotify/playlists/' . Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'),':').'?complete=true');
     }
     )->withoutMiddleware(['auth:sanctum']);
 
