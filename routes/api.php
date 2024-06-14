@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/spotify/auth', fn () => response()
-        ->json(['url' => Spotify::authUrl('https://jamfluencer.app/auth/spotify/callback')]));
+        ->json(['url' => Spotify::authUrl(config('spotify.redirect_uri'))]));
 
     Route::post('/spotify/auth', function (Request $request) {
         $request->validate(['code' => ['required', 'string']]);
@@ -72,15 +72,18 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::get('/spotify/playlists/{id}', function (Request $request, string $id): JsonResponse {
+        if (Cache::has('jam') === false) {
+            return response()->json(['message' => 'Only available during a jam.'], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
         try {
-            $playlist = Spotify::setToken($request->user()?->spotifyToken)
+            $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
                 ->playlist($id, $request->boolean('complete'));
         } catch (TypeError) {
             throw new RuntimeException('No Spotify authorization for user.');
         }
 
         return response()->json($playlist);
-    });
+    })->withoutMiddleware(['auth:sanctum']);
 
     Route::put('/jam/start/{playlist?}', function (Request $request, ?string $playlist = null): JsonResponse {
         if ($request->user()->spotifyToken === null) {
