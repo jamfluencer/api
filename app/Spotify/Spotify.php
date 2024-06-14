@@ -56,7 +56,7 @@ class Spotify
                 [
                     'grant_type' => 'authorization_code',
                     'code' => $authorizationCode,
-                    'redirect_uri' => URL::to('https://localhost:3000/auth/spotify/callback'),
+                    'redirect_uri' => URL::to('https://jamfluencer.app/auth/spotify/callback'),
                 ]
             );
 
