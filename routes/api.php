@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckJamMiddleware;
 use App\Models\User;
 use App\Playback\SpotifyAccount;
 use App\Playback\SpotifyToken;
@@ -52,29 +53,20 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
-        if (Cache::has('jam') === false) {
-            return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
         $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->currentlyPlaying();
 
         return response()->json($track);
-    });
+    })->middleware(CheckJamMiddleware::class);
 
     Route::get('/spotify/player/queue', function (): JsonResponse {
-        if (Cache::has('jam') === false) {
-            return response()->json(['message' => 'NO JAM FOR YOU'], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
         $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->queue();
 
         return response()->json($queue);
-    });
+    })->middleware(CheckJamMiddleware::class);
 
     Route::get('/spotify/playlists/{id}', function (Request $request, string $id): JsonResponse {
-        if (Cache::has('jam') === false) {
-            return response()->json(['message' => 'Only available during a jam.'], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
         try {
             $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
                 ->playlist($id, $request->boolean('complete'));
@@ -83,7 +75,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         }
 
         return response()->json($playlist);
-    })->withoutMiddleware(['auth:sanctum']);
+    })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 
     Route::put('/jam/start/{playlist?}', function (Request $request, ?string $playlist = null): JsonResponse {
         if ($request->user()->spotifyToken === null) {
@@ -139,11 +131,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     )->withoutMiddleware(['auth:sanctum']);
 
     Route::get('/jam/queue', function () {
-        if (Cache::has('jam') === false) {
-            return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
         return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->queue());
-    })->withoutMiddleware(['auth:sanctum']);
+    })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 });
