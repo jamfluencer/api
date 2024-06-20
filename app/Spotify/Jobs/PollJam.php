@@ -36,7 +36,7 @@ class PollJam implements ShouldQueue
         }
 
         if ($queue->currently_playing?->id !== Arr::get(Cache::get('jam', []), 'currently_playing')) {
-            JamUpdate::dispatch();
+            JamUpdate::dispatch(); // TODO Include if Playlist snapshot changed.
             Cache::put('jam', array_merge(Cache::get('jam'), ['currently_playing' => $queue->currently_playing->id]));
         }
 

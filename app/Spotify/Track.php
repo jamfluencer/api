@@ -38,9 +38,9 @@ readonly class Track
         }
 
         return new self(
+            name: $item['name'],
             album: new Album(...$item['album']),
             artists: array_map(fn (array $artist) => new Artist(...$artist), $item['artists']),
-            name: $item['name'],
             //            href: $item['href'],
             id: $item['id'],
             //            uri: $item['uri'],

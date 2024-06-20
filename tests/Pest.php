@@ -11,10 +11,13 @@
 |
 */
 
+use Illuminate\Foundation\Testing\WithFaker;
+
 uses(
     Tests\TestCase::class,
-    // Illuminate\Foundation\Testing\RefreshDatabase::class,
-)->in('Feature');
+    Illuminate\Foundation\Testing\RefreshDatabase::class,
+    WithFaker::class
+)->in('./');
 
 /*
 |--------------------------------------------------------------------------
