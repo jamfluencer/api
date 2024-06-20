@@ -2,6 +2,9 @@
 
 namespace App\Spotify;
 
+/**
+ * @property-read array<Track> $tracks
+ */
 readonly class Playlist
 {
     public function __construct(
@@ -10,7 +13,9 @@ readonly class Playlist
         public array $images,
         public array $tracks,
         public int $totalTracks,
-        public ?string $next
+        public ?string $next,
+        public string $url,
+        public string $snapshot
     ) {}
 
     public static function fromSpotify(array $spotify): self
@@ -22,6 +27,8 @@ readonly class Playlist
             tracks: array_map(fn (array $track) => Track::fromSpotify($track), $spotify['tracks']['items'] ?? []),
             totalTracks: $spotify['tracks']['total'],
             next: $spotify['tracks']['next'] ?? null,
+            url: $spotify['external_urls']['spotify'],
+            snapshot: $spotify['snapshot_id']
         );
     }
 
@@ -33,7 +40,9 @@ readonly class Playlist
             images: $this->images,
             tracks: array_merge($this->tracks, $tracks),
             totalTracks: $this->totalTracks,
-            next: $next
+            next: $next,
+            url: $this->url,
+            snapshot: $this->snapshot,
         );
     }
 }
