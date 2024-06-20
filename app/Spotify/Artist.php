@@ -8,6 +8,5 @@ readonly class Artist
         public string $id,
         public string $name,
         ...$args
-    ) {
-    }
+    ) {}
 }

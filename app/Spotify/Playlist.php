@@ -11,8 +11,7 @@ readonly class Playlist
         public array $tracks,
         public int $totalTracks,
         public ?string $next
-    ) {
-    }
+    ) {}
 
     public static function fromSpotify(array $spotify): self
     {
@@ -22,7 +21,7 @@ readonly class Playlist
             images: array_map(fn (array $image) => new Image(...$image), $spotify['images']),
             tracks: array_map(fn (array $track) => Track::fromSpotify($track), $spotify['tracks']['items'] ?? []),
             totalTracks: $spotify['tracks']['total'],
-            next: $spotify['tracks']['next']??null,
+            next: $spotify['tracks']['next'] ?? null,
         );
     }
 

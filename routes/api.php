@@ -94,7 +94,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         try {
             $track = $spotify->play($playlist);
         } catch (RequestException $exception) {
-            return  response()->json($exception->response->json(), $exception->getCode());
+            return response()->json($exception->response->json(), $exception->getCode());
         }
 
         Cache::put(
@@ -130,12 +130,12 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get(
         '/jam/playlist',
         function () {
-        if (Cache::has('jam') === false) {
-            return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
+            if (Cache::has('jam') === false) {
+                return response()->json(['message' => 'No one be jammin\''], Response::HTTP_SERVICE_UNAVAILABLE);
+            }
 
-        return redirect('/v1/spotify/playlists/' . Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'),':').'?complete=true');
-    }
+            return redirect('/v1/spotify/playlists/'.Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'), ':').'?complete=true');
+        }
     )->withoutMiddleware(['auth:sanctum']);
 
     Route::get('/jam/queue', function () {

@@ -6,8 +6,5 @@ use Tests\TestCase;
 
 class CurrentTest extends TestCase
 {
-    public function testCurrent(): void
-    {
-
-    }
+    public function testCurrent(): void {}
 }

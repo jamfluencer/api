@@ -4,7 +4,6 @@ namespace App\Spotify;
 
 use App\Playback\SpotifyToken;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -19,8 +18,7 @@ class Spotify
     public function __construct(
         private readonly string $id,
         private readonly string $secret
-    ) {
-    }
+    ) {}
 
     public function authUrl(string $redirectPath): string
     {

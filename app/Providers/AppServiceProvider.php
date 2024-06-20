@@ -23,17 +23,17 @@ class AppServiceProvider extends ServiceProvider
     {
         URL::macro(
             'fromComponents',
-            fn(array $components) => ($components['scheme'] ?? false
+            fn (array $components) => ($components['scheme'] ?? false
                     ? Str::finish(
                         $components['scheme'],
                         '://'
                     )
                     : '//')
-                . ($components['host'] ?? '')
-                . ($components['port'] ?? false ? Str::start($components['port'] ?? '', ':') : '')
-                . ($components['path'] ?? '')
-                . ($components['query'] ?? false ? Str::start($components['query'], '?') : '')
-                . ($components['fragment']??false ? Str::start($components['fragment'] ?? '', '#'): '')
+                .($components['host'] ?? '')
+                .($components['port'] ?? false ? Str::start($components['port'] ?? '', ':') : '')
+                .($components['path'] ?? '')
+                .($components['query'] ?? false ? Str::start($components['query'], '?') : '')
+                .($components['fragment'] ?? false ? Str::start($components['fragment'] ?? '', '#') : '')
         );
     }
 }
