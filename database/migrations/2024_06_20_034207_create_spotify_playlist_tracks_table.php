@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('playlist_id');
             $table->string('track_id');
             $table->string('added_by')->nullable();
+            $table->timestamps();
         });
     }
 

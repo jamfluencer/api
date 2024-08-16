@@ -32,6 +32,7 @@ class Playlist extends Model
             'playlist_id',
             'track_id'
         )
-            ->withPivot('added_by');
+            ->withPivot('added_by')
+            ->withTimestamps();
     }
 }
