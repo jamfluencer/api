@@ -8,16 +8,9 @@ use App\Spotify\Facades\Spotify;
 use App\Spotify\Playlist;
 use App\Spotify\Track;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 it('stores playlist', function () {
-    Cache::put(
-        'jam',
-        [
-            'user' => User::factory()->withSpotify()->create()->id,
-        ]
-    );
     Spotify::shouldReceive('setToken')->once()->andReturnSelf();
     Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
         new Playlist(
@@ -32,7 +25,7 @@ it('stores playlist', function () {
         )
     );
 
-    App::make(StorePlaylistJob::class, ['id' => $id])->handle();
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(PlaylistModel::query()->where([
         'id' => $id,
@@ -43,12 +36,6 @@ it('stores playlist', function () {
 });
 
 it('associates the tracks', function () {
-    Cache::put(
-        'jam',
-        [
-            'user' => User::factory()->withSpotify()->create()->id,
-        ]
-    );
     Spotify::shouldReceive('setToken')->once()->andReturnSelf();
     Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
         new Playlist(
@@ -94,7 +81,7 @@ it('associates the tracks', function () {
         )
     );
 
-    App::make(StorePlaylistJob::class, ['id' => $id])->handle();
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     /** @noinspection PhpPossiblePolymorphicInvocationInspection */
     expect(PlaylistModel::query()->sole()
@@ -103,12 +90,6 @@ it('associates the tracks', function () {
 });
 
 it('logs who added tracks', function () {
-    Cache::put(
-        'jam',
-        [
-            'user' => User::factory()->withSpotify()->create()->id,
-        ]
-    );
     Spotify::shouldReceive('setToken')->once()->andReturnSelf();
     Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
         new Playlist(
@@ -157,7 +138,7 @@ it('logs who added tracks', function () {
         )
     );
 
-    App::make(StorePlaylistJob::class, ['id' => $id])->handle();
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(PlaylistModel::query()->sole()->tracks()->wherePivotNull('added_by')->exists())->toBeFalse();
 });

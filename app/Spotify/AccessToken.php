@@ -24,11 +24,11 @@ readonly class AccessToken
         $this->scopes = collect(explode(' ', $scopes));
         $this->expiresAt = $expiry instanceof DateTime
             ? $expiry
-            : (new DateTime())->add(new DateInterval("PT{$expiry}S"));
+            : (new DateTime)->add(new DateInterval("PT{$expiry}S"));
     }
 
     public function expired(): bool
     {
-        return $this->expiresAt < new DateTime();
+        return $this->expiresAt < new DateTime;
     }
 }

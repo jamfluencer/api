@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Playback\Jobs\StorePlaylist;
-use App\Spotify\Facades\Spotify;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\PromptsForMissingInput;
 
@@ -36,6 +35,6 @@ class LoadPlaylist extends Command implements PromptsForMissingInput
             ->where('email', $this->argument('as'))
             ->orWhere('id', $this->argument('as'))
             ->sole();
-        StorePlaylist::dispatchSync($this->argument('playlist'), $user);
+        StorePlaylist::dispatchSync($user, $this->argument('playlist'));
     }
 }
