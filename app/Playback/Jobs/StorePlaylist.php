@@ -22,7 +22,7 @@ class StorePlaylist implements ShouldQueue
         private readonly string $id
     ) {}
 
-    public function handle()
+    public function handle(): void
     {
         $playlist = Spotify::setToken($this->user->spotifyToken)->playlist($this->id, true);
 
@@ -40,8 +40,14 @@ class StorePlaylist implements ShouldQueue
             ]
         );
 
+        if ($model->wasRecentlyCreated === false && $model->snapshot === $playlist->snapshot) {
+            return; // Snapshot matches, no updates needed.
+        }
+
+        $model->tracks()->detach(); // Rebuild the playlist, syncing gets weird.
+
         foreach ($playlist->tracks as $track) {
-            $model->tracks()->save(
+            $model->tracks()->attach(
                 Track::query()->firstOrCreate(['id' => $track->id]),
                 ['added_by' => $track->added_by]
             );
