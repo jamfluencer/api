@@ -11,6 +11,8 @@ use Illuminate\Support\Str;
  */
 class TrackFactory extends Factory
 {
+    protected $model = Track::class;
+
     public function definition(): array
     {
         return ['id' => Str::random()];

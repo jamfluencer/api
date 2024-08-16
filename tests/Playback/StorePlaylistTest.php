@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Playback\Jobs\StorePlaylist as StorePlaylistJob;
 use App\Playback\Playlist as PlaylistModel;
+use App\Playback\Track as TrackModel;
 use App\Spotify\Album;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Playlist;
@@ -141,4 +142,63 @@ it('logs who added tracks', function () {
     App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(PlaylistModel::query()->sole()->tracks()->wherePivotNull('added_by')->exists())->toBeFalse();
+});
+
+it('handles repeated tracks', function () {
+    /** @var PlaylistModel $existingPlaylist */
+    $existingPlaylist = PlaylistModel::factory()
+        ->afterCreating(fn (PlaylistModel $playlist) => TrackModel::factory()->hasAttached($playlist)->create())
+        ->create();
+    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
+    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
+        new Playlist(
+            name: $this->faker->name(),
+            id: $id,
+            images: [],
+            tracks: $tracks = [
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        []
+                    ),
+                    artists: [],
+                    id: $existingPlaylist->tracks->first()->id,
+                    added_by: Str::random()
+                ),
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        []
+                    ),
+                    artists: [],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        []
+                    ),
+                    artists: [],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+            ],
+            totalTracks: count($tracks),
+            next: '',
+            url: $this->faker->url(),
+            snapshot: Str::random()
+        )
+    );
+
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
+
+    expect(PlaylistModel::query()->count())->toBe(2, 'Unexpected number of Playlists.')
+        ->and($existingPlaylist->tracks->first()->playlists()->count())->toBe(2, 'Track associated with incorrect number of Playlists.');
 });

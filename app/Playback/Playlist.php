@@ -2,7 +2,9 @@
 
 namespace App\Playback;
 
+use Database\Factories\PlaylistFactory;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -11,6 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Playlist extends Model
 {
+    use HasFactory;
+
+    public static string $factory = PlaylistFactory::class;
+
     protected $table = 'spotify_playlists';
 
     protected $keyType = 'string';
