@@ -25,7 +25,7 @@ jobs:
     - name: Create Database
       run: |
         mkdir -p database
-        touch database/jam.sqlite
+        touch database/database.sqlite
     - name: Execute style checking via Pint
       run: ./vendor/bin/pint --dirty --test
     - name: Execute tests (Unit and Feature tests) via Pest
