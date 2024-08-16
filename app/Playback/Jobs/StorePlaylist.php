@@ -4,6 +4,7 @@ namespace App\Playback\Jobs;
 
 use App\Models\User;
 use App\Playback\Playlist;
+use App\Playback\Track;
 use App\Spotify\Facades\Spotify;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -40,7 +41,10 @@ class StorePlaylist implements ShouldQueue
         );
 
         foreach ($playlist->tracks as $track) {
-            $model->tracks()->create(['id' => $track->id], ['added_by' => $track->added_by]);
+            $model->tracks()->save(
+                Track::query()->firstOrCreate(['id' => $track->id]),
+                ['added_by' => $track->added_by]
+            );
         }
     }
 }

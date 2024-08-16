@@ -5,6 +5,7 @@ namespace App\Playback;
 use Database\Factories\TrackFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @method static TrackFactory factory($count = null, $state = [])
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 class Track extends Model
 {
     use HasFactory;
+
+    public static string $factory = TrackFactory::class;
 
     protected $keyType = 'string';
 
@@ -22,4 +25,16 @@ class Track extends Model
     protected $fillable = [
         'id',
     ];
+
+    public function playlists(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Playlist::class,
+            'spotify_playlist_tracks',
+            'track_id',
+            'playlist_id'
+        )
+            ->withPivot('added_by')
+            ->withTimestamps();
+    }
 }
