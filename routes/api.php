@@ -18,7 +18,7 @@ use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
-    Route::get('/spotify/auth', fn() => response()
+    Route::get('/spotify/auth', fn () => response()
         ->json(['url' => Spotify::authUrl(config('spotify.redirect_uri'))]));
 
     Route::post('/spotify/auth', function (Request $request) {
@@ -33,7 +33,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         ]);
         $account = Spotify::setToken($token)->profile();
         tap(
-        // TODO It should be first of any accounts, not just the user's
+            // TODO It should be first of any accounts, not just the user's
             $request->user()->spotifyAccounts()->firstOrCreate(
                 [
                     'id' => $account->id,
@@ -44,13 +44,13 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
                     'country' => $account->country,
                 ]
             ),
-            fn(SpotifyAccount $account) => $account->token()->delete())
+            fn (SpotifyAccount $account) => $account->token()->delete())
             ->token()->save($token);
 
         return response()->noContent();
     });
 
-    Route::get('/me', fn(Request $request) => $request->user());
+    Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
         $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
@@ -122,7 +122,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get(
         '/jam/playlist',
         function () {
-            return redirect('/v1/spotify/playlists/' . Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'), ':') . '?complete=true');
+            return redirect('/v1/spotify/playlists/'.Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'), ':').'?complete=true');
         }
     )->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 
