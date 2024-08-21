@@ -76,4 +76,9 @@ class User extends Authenticatable
             get: fn () => (bool) $this->spotifyToken
         );
     }
+
+    public function kudos(): HasMany
+    {
+        return $this->hasMany(Kudos::class, 'for_user_id');
+    }
 }
