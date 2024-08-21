@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Middleware\CheckJamMiddleware;
+use App\Models\Kudos;
 use App\Models\User;
 use App\Playback\SpotifyAccount;
 use App\Playback\SpotifyToken;
+use App\Playback\Track;
+use App\Social\Requests\Kudos\Store;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
@@ -130,4 +133,29 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
             ->queue());
     })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
+});
+
+Route::prefix('v1')->group(function () {
+    Route::post('/jam/kudos', function (Store $request): JsonResponse {
+        $kudos = Kudos::query()->make([
+            'track_id' => ($track = Track::query()
+                ->find($request->validated('track', Arr::get(Cache::get('jam', []), 'currently_playing'))))
+                ?->id,
+            'playlist_id' => ($playlist = $track
+                ?->playlists()
+                ?->find($request->validated('playlist', Arr::get(Cache::get('jam', []), 'playlist')))
+                ?? $track?->first_occurrence
+            )
+            ?->id,
+            'for_user_id' => $request->validated('for', $playlist?->pivot?->added_by),
+        ]);
+
+        if ($kudos->track_id === null || $kudos->for_user_id === null) {
+            return response()->json(status: Response::HTTP_NOT_FOUND);
+        }
+
+        $kudos->save();
+
+        return response()->json(status: Response::HTTP_ACCEPTED);
+    })->middleware(['throttle:kudos']);
 });
