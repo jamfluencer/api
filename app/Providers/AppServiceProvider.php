@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -34,6 +37,12 @@ class AppServiceProvider extends ServiceProvider
                 .($components['path'] ?? '')
                 .($components['query'] ?? false ? Str::start($components['query'], '?') : '')
                 .($components['fragment'] ?? false ? Str::start($components['fragment'] ?? '', '#') : '')
+        );
+
+        RateLimiter::for(
+            'kudos',
+            fn (Request $request) => Limit::perMinutes(2, 1)
+                ->by($request->user()?->id ?: $request->ip())
         );
     }
 }

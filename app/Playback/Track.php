@@ -3,6 +3,7 @@
 namespace App\Playback;
 
 use Database\Factories\TrackFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -36,5 +37,12 @@ class Track extends Model
         )
             ->withPivot('added_by')
             ->withTimestamps();
+    }
+
+    public function firstOccurrence(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->playlists()->orderByPivot('created_at')->first()
+        );
     }
 }
