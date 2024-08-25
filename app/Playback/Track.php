@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @method static TrackFactory factory($count = null, $state = [])
+ *
+ * @property-read Playlist $first_occurrence
  */
 class Track extends Model
 {

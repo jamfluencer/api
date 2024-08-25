@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Playback\Playlist;
+use App\Playback\SpotifyAccount;
 use App\Playback\Track;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -25,7 +26,10 @@ return new class extends Migration
                 ->nullable()
                 ->constrained(User::query()->newModelInstance()->getTable());
             $table->foreignIdFor(User::class, 'for_user_id')
+                ->nullable()
                 ->constrained(User::query()->newModelInstance()->getTable());
+            $table->foreignIdFor(SpotifyAccount::class, 'for_spotify_account_id')
+                ->constrained(SpotifyAccount::query()->newModelInstance()->getTable());
             $table->timestamps();
             $table->softDeletes();
         });

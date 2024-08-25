@@ -28,12 +28,6 @@ class Store extends FormRequest
                 'string',
                 'exists:spotify_playlists,id',
             ],
-            'for' => [
-                'sometimes',
-                'required',
-                'integer',
-                'exists:users,id',
-            ],
         ];
     }
 }

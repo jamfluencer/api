@@ -147,11 +147,16 @@ Route::prefix('v1')->group(function () {
                 ?? $track?->first_occurrence
             )
             ?->id,
-            'for_user_id' => $request->validated('for', $playlist?->pivot?->added_by),
+            'for_spotify_account_id' => $playlist?->pivot?->added_by,
+            'from_user_id' => $request->user()?->id,
         ]);
 
-        if ($kudos->track_id === null || $kudos->for_user_id === null) {
+        if ($kudos->track_id === null || $kudos->for_spotify_account_id === null) {
             return response()->json(status: Response::HTTP_NOT_FOUND);
+        }
+
+        if ($request->user()?->spotifyAccounts()->where('display_name', $kudos->for_spotify_account_id)->exists()) {
+            return response()->json(['message' => 'Good try though!'], Response::HTTP_PAYMENT_REQUIRED);
         }
 
         $kudos->save();

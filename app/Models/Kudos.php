@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Playback\Playlist;
+use App\Playback\SpotifyAccount;
 use App\Playback\Track;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,7 @@ class Kudos extends Model
         'playlist_id',
         'for_user_id',
         'from_user_id',
+        'for_spotify_account_id',
     ];
 
     public function track(): BelongsTo
@@ -29,7 +31,12 @@ class Kudos extends Model
         return $this->belongsTo(Playlist::class);
     }
 
-    public function for(): BelongsTo
+    public function forSpotifyAccount(): BelongsTo
+    {
+        return $this->belongsTo(SpotifyAccount::class, 'for_spotify_account_id');
+    }
+
+    public function forUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'for_user_id');
     }
