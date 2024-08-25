@@ -2,11 +2,13 @@
 
 namespace App\Playback;
 
+use App\Models\Kudos;
 use App\Models\User;
 use Database\Factories\SpotifyAccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -34,6 +36,11 @@ class SpotifyAccount extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function kudos(): HasMany
+    {
+        return $this->hasMany(Kudos::class, 'for_spotify_account_id');
     }
 
     protected static function newFactory(): SpotifyAccountFactory
