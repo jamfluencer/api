@@ -1,0 +1,18 @@
+meta {
+  name: Kudos Specific Track in Specific Playlist
+  type: http
+  seq: 3
+}
+
+post {
+  url: /v1/jam/kudos
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "track": "spotify-track-id",
+    "playlist": "spotify-playlist-id"
+  }
+}
