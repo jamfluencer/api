@@ -192,5 +192,10 @@ it('does not allow giving oneself kudos', function () {
     expect(Kudos::query()->count())->toBe(0);
 });
 
-it('throttles kudos', function () {})
-    ->todo();
+it('throttles kudos', function () {
+    $this->freezeTime();
+    $this->postJson('v1/jam/kudos')->assertNotFound();
+    $this->postJson('v1/jam/kudos')->assertTooManyRequests();
+    $this->travel(2)->minutes();
+    $this->postJson('v1/jam/kudos')->assertNotFound();
+});
