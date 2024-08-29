@@ -1,0 +1,22 @@
+meta {
+  name: Start
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{v2}}/jam/start
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+   "playlist": "spotify:playlist:7vZgyz5NgCzeZv5EezzATc?si=a6a2b125856b4760",
+    "jam": "https://spotify.link/something"
+  }
+}
