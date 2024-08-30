@@ -1,9 +1,11 @@
 <?php
 
+use App\Catalog\Requests\Search;
 use App\Http\Middleware\CheckJamMiddleware;
 use App\Models\Kudos;
 use App\Models\User;
 use App\Playback\Jobs\StorePlaylist;
+use App\Playback\Playlist;
 use App\Playback\Requests\Jam\Start;
 use App\Playback\SpotifyAccount;
 use App\Playback\SpotifyToken;
@@ -13,6 +15,7 @@ use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Jobs\PollJam;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -165,6 +168,22 @@ Route::prefix('v1')->group(function () {
 
         return response()->json(status: Response::HTTP_ACCEPTED);
     })->middleware(['throttle:kudos']);
+
+    Route::prefix('catalog')->group(function () {
+        Route::get('search', function (Search $request): JsonResponse {
+            $p = Playlist::query()
+                ->whereHas(
+                    'tracks',
+                    fn (Builder $trackQuery) => $trackQuery
+                        ->where('id', $request->validated('track'))
+                )
+                ->get();
+
+            return response()->json($p
+                ->pluck('name', 'id')
+                ->toArray());
+        });
+    });
 });
 
 Route::prefix('v2')->middleware(['auth:sanctum'])->group(function () {
