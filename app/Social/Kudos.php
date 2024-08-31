@@ -32,6 +32,7 @@ class Kudos extends Model
     protected $hidden = [
         'id',
         'updated_at',
+        'deleted_at',
     ];
 
     public function track(): BelongsTo
