@@ -12,6 +12,10 @@ class JamStarted implements ShouldBroadcast
     use Dispatchable;
     use InteractsWithSockets;
 
+    public function __construct(
+        public ?string $url
+    ) {}
+
     public function broadcastOn(): array
     {
         return [
