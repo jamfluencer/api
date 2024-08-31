@@ -2,8 +2,8 @@
 
 namespace App\Playback;
 
-use App\Models\Kudos;
 use App\Models\User;
+use App\Social\Kudos;
 use Database\Factories\SpotifyAccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

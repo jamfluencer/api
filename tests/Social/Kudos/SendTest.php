@@ -1,13 +1,16 @@
 <?php
 
-use App\Models\Kudos;
 use App\Models\User;
 use App\Playback\Playlist;
 use App\Playback\SpotifyAccount;
 use App\Playback\Track;
+use App\Social\Kudos;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Testing\Fluent\AssertableJson;
+
+beforeEach(fn () => Event::fake());
 
 it('allows for specifying the track', function () {
     $track = Track::factory()
