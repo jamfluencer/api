@@ -2,7 +2,6 @@
 
 use App\Catalog\Requests\Search;
 use App\Http\Middleware\CheckJamMiddleware;
-use App\Models\Kudos;
 use App\Models\User;
 use App\Playback\Jobs\StorePlaylist;
 use App\Playback\Playlist;
@@ -10,6 +9,8 @@ use App\Playback\Requests\Jam\Start;
 use App\Playback\SpotifyAccount;
 use App\Playback\SpotifyToken;
 use App\Playback\Track;
+use App\Social\Events\Kudos as KudosEvent;
+use App\Social\Kudos;
 use App\Social\Requests\Kudos\Store;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
@@ -107,7 +108,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             60 * 60 * 8
         );
 
-        JamStarted::dispatch();
+        JamStarted::dispatch(null);
         PollJam::dispatchAfterResponse();
 
         return response()->json($track);
@@ -166,6 +167,8 @@ Route::prefix('v1')->group(function () {
 
         $kudos->save();
 
+        KudosEvent::dispatch($kudos);
+
         return response()->json(status: Response::HTTP_ACCEPTED);
     })->middleware(['throttle:kudos']);
 
@@ -211,7 +214,7 @@ Route::prefix('v2')->middleware(['auth:sanctum'])->group(function () {
                 ]
             );
 
-        JamStarted::dispatch();
+        JamStarted::dispatch($request->validated('jam'));
 
         StorePlaylist::dispatchAfterResponse($request->user(), $request->validated('playlist'));
         PollJam::dispatchAfterResponse();
