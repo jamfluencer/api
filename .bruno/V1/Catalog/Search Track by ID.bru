@@ -1,0 +1,15 @@
+meta {
+  name: Search Track by ID
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{v1}}/v1/catalog/search?track=abcdef
+  body: none
+  auth: none
+}
+
+query {
+  track: abcdef
+}
