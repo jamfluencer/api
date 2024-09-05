@@ -48,7 +48,7 @@ class StorePlaylist implements ShouldQueue
 
         foreach ($playlist->tracks as $track) {
             $model->tracks()->attach(
-                Track::query()->firstOrCreate(['id' => $track->id]),
+                Track::query()->firstOrCreate(['id' => $track->id], ['name' => $track->name]),
                 ['added_by' => $track->added_by]
             );
         }
