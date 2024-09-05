@@ -13,7 +13,7 @@ describe('Searching by track', function () {
             ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
             ->create();
 
-        $this->getJson("v1/catalog/search?track={$track->id}")
+        $this->getJson("v1/catalog/search?term={$track->id}")
             ->assertSuccessful()
             ->assertJson([
                 $track->playlists->sole()->id => $track->playlists->sole()->name,
@@ -25,7 +25,7 @@ describe('Searching by track', function () {
             ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
             ->create();
 
-        $this->getJson("v1/catalog/search?track={$track->title}")
+        $this->getJson("v1/catalog/search?term={$track->title}")
             ->assertSuccessful();
     })->skip('Requires storing more Track information.');
 });

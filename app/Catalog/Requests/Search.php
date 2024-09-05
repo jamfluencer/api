@@ -9,7 +9,7 @@ class Search extends FormRequest
     public function rules(): array
     {
         return [
-            'track' => 'sometimes|required|string',
+            'term' => 'sometimes|required|string',
         ];
     }
 }

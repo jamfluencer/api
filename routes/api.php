@@ -63,14 +63,14 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
-        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
             ->currentlyPlaying();
 
         return response()->json($track);
     })->middleware(CheckJamMiddleware::class);
 
     Route::get('/spotify/player/queue', function (): JsonResponse {
-        $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+        $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
             ->queue();
 
         return response()->json($queue);
@@ -78,7 +78,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/spotify/playlists/{id}', function (Request $request, string $id): JsonResponse {
         try {
-            $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+            $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
                 ->playlist($id, $request->boolean('complete'));
         } catch (TypeError) {
             throw new RuntimeException('No Spotify authorization for user.');
@@ -131,12 +131,12 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get(
         '/jam/playlist',
         function () {
-            return redirect('/v1/spotify/playlists/'.Str::afterLast(Arr::get(Cache::get('jam', []), 'playlist'), ':').'?complete=true');
+            return redirect('/v1/spotify/playlists/'.Str::afterLast(Arr::get(Cache::get('jam', fn () => []), 'playlist'), ':').'?complete=true');
         }
     )->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 
     Route::get('/jam/queue', function () {
-        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', []), 'user'))->spotifyToken)
+        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
             ->queue());
     })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 });
@@ -145,11 +145,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/jam/kudos', function (Store $request): JsonResponse {
         $kudos = Kudos::query()->make([
             'track_id' => ($track = Track::query()
-                ->find($request->validated('track', Arr::get(Cache::get('jam', []), 'currently_playing'))))
+                ->find($request->validated('track', Arr::get(Cache::get('jam', fn () => []), 'currently_playing'))))
                 ?->id,
             'playlist_id' => ($playlist = $track
                 ?->playlists()
-                ?->find($request->validated('playlist', Arr::get(Cache::get('jam', []), 'playlist')))
+                ?->find($request->validated('playlist', Arr::get(Cache::get('jam', fn () => []), 'playlist')))
                 ?? $track?->first_occurrence
             )
                 ?->id,
@@ -178,7 +178,7 @@ Route::prefix('v1')->group(function () {
                 ->whereHas(
                     'tracks',
                     fn (Builder $trackQuery) => $trackQuery
-                        ->where('id', $request->validated('track'))
+                        ->where('id', $request->validated('term'))
                 )
                 ->get();
 
