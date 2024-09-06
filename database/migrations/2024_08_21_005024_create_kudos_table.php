@@ -17,21 +17,21 @@ return new class extends Migration
     {
         Schema::create('kudos', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Track::class)
-                ->constrained(Track::query()->newModelInstance()->getTable());
-            $table->foreignIdFor(Playlist::class)
-                ->nullable()
-                ->constrained(Playlist::query()->newModelInstance()->getTable());
+            $table->string('track_id');
+            $table->string('playlist_id')->nullable();
             $table->foreignIdFor(User::class, 'from_user_id')
                 ->nullable()
                 ->constrained(User::query()->newModelInstance()->getTable());
             $table->foreignIdFor(User::class, 'for_user_id')
                 ->nullable()
                 ->constrained(User::query()->newModelInstance()->getTable());
-            $table->foreignIdFor(SpotifyAccount::class, 'for_spotify_account_id')
-                ->constrained(SpotifyAccount::query()->newModelInstance()->getTable());
+            $table->string('for_spotify_account_id');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('track_id')->references('id')->on('spotify_tracks');
+            $table->foreign('playlist_id')->references('id')->on('spotify_playlists');
+            $table->foreign('for_spotify_account_id')->references('id')->on('spotify_accounts');
         });
     }
 
