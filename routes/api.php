@@ -214,6 +214,14 @@ Route::prefix('v2')->middleware(['auth:sanctum'])->group(function () {
             ],
             60 * 60 * 8
         );
+        Cache::put(
+            'jam',
+            [
+                'user' => $request->user()->id,
+                'playlist' => $request->validated('playlist'),
+            ],
+            60 * 60 * 8
+        );
 
         Http::timeout(3)
             ->post(
