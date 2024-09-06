@@ -15,7 +15,8 @@ readonly class Playlist
         public int $totalTracks,
         public ?string $next,
         public string $url,
-        public string $snapshot
+        public string $snapshot,
+        public bool $collaborative = true,
     ) {}
 
     public static function fromSpotify(array $spotify): self
@@ -28,7 +29,8 @@ readonly class Playlist
             totalTracks: $spotify['tracks']['total'],
             next: $spotify['tracks']['next'] ?? null,
             url: $spotify['external_urls']['spotify'],
-            snapshot: $spotify['snapshot_id']
+            snapshot: $spotify['snapshot_id'],
+            collaborative: $spotify['collaborative'] ?? true,
         );
     }
 

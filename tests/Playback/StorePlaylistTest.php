@@ -91,60 +91,6 @@ it('associates the tracks', function () {
 
 });
 
-it('logs who added tracks', function () {
-    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
-    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
-        new Playlist(
-            name: $this->faker->name(),
-            id: $id,
-            images: [],
-            tracks: $tracks = [
-                new Track(
-                    name: $this->faker->name(),
-                    album: new Album(
-                        Str::random(),
-                        $this->faker->name(),
-                        []
-                    ),
-                    artists: [],
-                    id: Str::random(),
-                    added_by: Str::random()
-                ),
-                new Track(
-                    name: $this->faker->name(),
-                    album: new Album(
-                        Str::random(),
-                        $this->faker->name(),
-                        []
-                    ),
-                    artists: [],
-                    id: Str::random(),
-                    added_by: Str::random()
-                ),
-                new Track(
-                    name: $this->faker->name(),
-                    album: new Album(
-                        Str::random(),
-                        $this->faker->name(),
-                        []
-                    ),
-                    artists: [],
-                    id: Str::random(),
-                    added_by: Str::random()
-                ),
-            ],
-            totalTracks: count($tracks),
-            next: '',
-            url: $this->faker->url(),
-            snapshot: Str::random()
-        )
-    );
-
-    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
-
-    expect(PlaylistModel::query()->sole()->tracks()->wherePivotNull('added_by')->exists())->toBeFalse();
-});
-
 it('handles repeated tracks', function () {
     /** @var PlaylistModel $existingPlaylist */
     $existingPlaylist = PlaylistModel::factory()

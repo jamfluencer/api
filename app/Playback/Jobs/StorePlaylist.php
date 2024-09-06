@@ -33,8 +33,8 @@ class StorePlaylist implements ShouldQueue
             $this->fail('Failed to retrieve playlist.');
         }
 
-        /** @var Playlist $model */
-        $model = Playlist::query()->createOrFirst(
+        /** @var Playlist $playlistModel */
+        $playlistModel = Playlist::query()->createOrFirst(
             ['id' => $playlist->id],
             [
                 'name' => $playlist->name,
@@ -43,15 +43,16 @@ class StorePlaylist implements ShouldQueue
             ]
         );
 
-        if ($model->wasRecentlyCreated === false && $model->snapshot === $playlist->snapshot) {
+        if ($playlistModel->wasRecentlyCreated === false && $playlistModel->snapshot === $playlist->snapshot) {
             return; // Snapshot matches, no updates needed.
         }
 
-        $model->tracks()->detach(); // Rebuild the playlist, syncing gets weird.
+        $playlistModel->tracks()->detach(); // Rebuild the playlist, syncing gets weird.
 
         foreach ($playlist->tracks as $track) {
-            $model->tracks()->attach(
-                tap(Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
+            $playlistModel->tracks()->attach(
+                $trackModel = tap(
+                    Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
                     fn (Track $trackModel) => $trackModel->artists()
                         ->sync(Arr::pluck(array_map(
                             fn (Artist $artist) => ArtistModel::query()
@@ -59,7 +60,11 @@ class StorePlaylist implements ShouldQueue
                             $track->artists
                         ), 'id'))
                 ),
-                ['added_by' => $track->added_by]
+                [
+                    'added_by' => $playlist->collaborative === true
+                        ? $track->added_by
+                        : ($trackModel->first_occurrence?->pivot?->added_by ?? $track->added_by),
+                ]
             );
 
         }
