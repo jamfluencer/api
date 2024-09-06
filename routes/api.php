@@ -176,7 +176,7 @@ Route::prefix('v1')->group(function () {
             return response()->json(array_filter([
                 'tracks' => Track::query()
                     ->where('id', $request->validated('term'))
-                    ->orWhereLike('name', $request->validated('term'))
+                    ->orWhereLike('name', "%{$request->validated('term')}%")
                     ->with(['playlists', 'artists'])
                     ->get()
                     ->toArray(),
@@ -188,7 +188,7 @@ Route::prefix('v1')->group(function () {
                 //                    ->toArray(),
                 'artists' => Artist::query()
                     ->where('id', $request->validated('term'))
-                    ->orWhereLike('name', $request->validated('term'))
+                    ->orWhereLike('name', "%{$request->validated('term')}%")
                     ->with(['tracks.playlists'])
                     ->get()
                     ->toArray(),
