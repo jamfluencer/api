@@ -3,13 +3,16 @@
 namespace App\Playback\Jobs;
 
 use App\Models\User;
+use App\Playback\Artist as ArtistModel;
 use App\Playback\Playlist;
 use App\Playback\Track;
+use App\Spotify\Artist;
 use App\Spotify\Facades\Spotify;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Arr;
 
 class StorePlaylist implements ShouldQueue
 {
@@ -48,9 +51,17 @@ class StorePlaylist implements ShouldQueue
 
         foreach ($playlist->tracks as $track) {
             $model->tracks()->attach(
-                Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
+                tap(Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
+                    fn (Track $trackModel) => $trackModel->artists()
+                        ->sync(Arr::pluck(array_map(
+                            fn (Artist $artist) => ArtistModel::query()
+                                ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
+                            $track->artists
+                        ), 'id'))
+                ),
                 ['added_by' => $track->added_by]
             );
+
         }
     }
 }

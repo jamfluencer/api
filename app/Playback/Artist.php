@@ -20,6 +20,12 @@ class Artist extends Model
 
     protected $keyType = 'string';
 
+    protected $fillable = [
+        'id',
+        'name',
+        'uri',
+    ];
+
     public function tracks(): BelongsToMany
     {
         return $this->belongsToMany(

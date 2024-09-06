@@ -1,10 +1,12 @@
 <?php
 
 use App\Models\User;
+use App\Playback\Artist as ArtistModel;
 use App\Playback\Jobs\StorePlaylist as StorePlaylistJob;
 use App\Playback\Playlist as PlaylistModel;
 use App\Playback\Track as TrackModel;
 use App\Spotify\Album;
+use App\Spotify\Artist;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Playlist;
 use App\Spotify\Track;
@@ -309,4 +311,64 @@ it('stores track names', function () {
     App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(TrackModel::query()->whereNull('name')->count())->toBe(0);
+});
+
+it('stores artists', function () {
+    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
+    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
+        new Playlist(
+            name: $this->faker->name(),
+            id: $id,
+            images: [],
+            tracks: $tracks = [
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        []
+                    ),
+                    artists: [
+                        new Artist(
+                            id: Str::random(),
+                            name: fake()->name(),
+                            uri: fake()->url(),
+                        ),
+                    ],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        []
+                    ),
+                    artists: [
+                        new Artist(...[
+                            'name' => fake()->name(),
+                            'id' => Str::random(),
+                            'uri' => fake()->url(),
+                        ]),
+                        new Artist(
+                            id: Str::random(),
+                            name: fake()->name(),
+                            uri: fake()->url(),
+                        ),
+                    ],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+            ],
+            totalTracks: count($tracks),
+            next: '',
+            url: $this->faker->url(),
+            snapshot: Str::random()
+        )
+    );
+
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
+
+    expect(ArtistModel::query()->count())->toBe(3);
 });

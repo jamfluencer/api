@@ -130,7 +130,6 @@ class Spotify
         parse_str($components['query'] ?? '', $query);
         $query['fields'] = 'next,items(added_by,track(id,name,artists,duration_ms,album(id,name,images)))';
 
-        /** @noinspection PhpUndefinedMethodInspection */
         return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
     }
 
