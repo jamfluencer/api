@@ -15,6 +15,9 @@ class TrackFactory extends Factory
 
     public function definition(): array
     {
-        return ['id' => Str::random()];
+        return [
+            'id' => Str::random(),
+            'name' => fake()->words(3, true),
+        ];
     }
 }

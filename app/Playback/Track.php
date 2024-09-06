@@ -47,4 +47,10 @@ class Track extends Model
             get: fn () => $this->playlists()->orderByPivot('created_at')->first()
         );
     }
+
+    public function artists(): BelongsToMany
+    {
+        return $this->belongsToMany(Artist::class, 'spotify_track_artists',
+            'track_id', 'artist_id');
+    }
 }

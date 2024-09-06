@@ -41,4 +41,9 @@ class Playlist extends Model
             ->withPivot('added_by')
             ->withTimestamps();
     }
+
+    public function artists(): BelongsToMany
+    {
+        return $this->belongsToMany(Artist::class);
+    }
 }

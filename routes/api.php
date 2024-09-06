@@ -3,8 +3,8 @@
 use App\Catalog\Requests\Search;
 use App\Http\Middleware\CheckJamMiddleware;
 use App\Models\User;
+use App\Playback\Artist;
 use App\Playback\Jobs\StorePlaylist;
-use App\Playback\Playlist;
 use App\Playback\Requests\Jam\Start;
 use App\Playback\SpotifyAccount;
 use App\Playback\SpotifyToken;
@@ -16,7 +16,6 @@ use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Jobs\PollJam;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -174,17 +173,26 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('catalog')->group(function () {
         Route::get('search', function (Search $request): JsonResponse {
-            $p = Playlist::query()
-                ->whereHas(
-                    'tracks',
-                    fn (Builder $trackQuery) => $trackQuery
-                        ->where('id', $request->validated('term'))
-                )
-                ->get();
-
-            return response()->json($p
-                ->pluck('name', 'id')
-                ->toArray());
+            return response()->json(array_filter([
+                'tracks' => Track::query()
+                    ->where('id', $request->validated('term'))
+                    ->orWhereLike('name', $request->validated('term'))
+                    ->with(['playlists', 'artists'])
+                    ->get()
+                    ->toArray(),
+                //                'albums' => Artist::query()
+                //                    ->where('id', $request->validated('term'))
+                //                    ->orWhereLike('name', $request->validated('term'))
+                //                    ->with(['playlists'])
+                //                    ->get()
+                //                    ->toArray(),
+                'artists' => Artist::query()
+                    ->where('id', $request->validated('term'))
+                    ->orWhereLike('name', $request->validated('term'))
+                    ->with(['tracks.playlists'])
+                    ->get()
+                    ->toArray(),
+            ]));
         });
     });
 });
