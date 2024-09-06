@@ -21,6 +21,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -173,10 +174,12 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('catalog')->group(function () {
         Route::get('search', function (Search $request): JsonResponse {
+            $term = Str::lower($request->validated('term'));
+
             return response()->json(array_filter([
                 'tracks' => Track::query()
                     ->where('id', $request->validated('term'))
-                    ->orWhereLike('name', "%{$request->validated('term')}%")
+                    ->orWhereLike(DB::raw('lower(name)'), "%{$term}%")
                     ->with(['playlists', 'artists'])
                     ->get()
                     ->toArray(),
@@ -188,7 +191,7 @@ Route::prefix('v1')->group(function () {
                 //                    ->toArray(),
                 'artists' => Artist::query()
                     ->where('id', $request->validated('term'))
-                    ->orWhereLike('name', "%{$request->validated('term')}%")
+                    ->orWhereLike(DB::raw('lower(name)'), "%{$term}%")
                     ->with(['tracks.playlists'])
                     ->get()
                     ->toArray(),

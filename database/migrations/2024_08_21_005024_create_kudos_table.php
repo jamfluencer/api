@@ -1,9 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Playback\Playlist;
-use App\Playback\SpotifyAccount;
-use App\Playback\Track;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
