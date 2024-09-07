@@ -34,7 +34,7 @@ class StorePlaylist implements ShouldQueue
         }
 
         /** @var Playlist $playlistModel */
-        $playlistModel = Playlist::query()->createOrFirst(
+        $playlistModel = Playlist::query()->updateOrCreate(
             ['id' => $playlist->id],
             [
                 'name' => $playlist->name,
