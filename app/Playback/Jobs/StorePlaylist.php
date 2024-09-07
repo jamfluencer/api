@@ -52,20 +52,21 @@ class StorePlaylist implements ShouldQueue
         $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
 
         foreach ($playlist->tracks as $track) {
+            $trackModel = tap(
+                Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
+                fn (Track $trackModel) => $trackModel->artists()
+                    ->sync(Arr::pluck(array_map(
+                        fn (Artist $artist) => ArtistModel::query()
+                            ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
+                        $track->artists
+                    ), 'id'))
+            );
             $playlistModel->tracks()->attach(
-                tap(
-                    Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
-                    fn (Track $trackModel) => $trackModel->artists()
-                        ->sync(Arr::pluck(array_map(
-                            fn (Artist $artist) => ArtistModel::query()
-                                ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
-                            $track->artists
-                        ), 'id'))
-                ),
+                $trackModel,
                 [
                     'added_by' => $matchFirstOccurrence
-                        ? $track->added_by
-                        : ($trackModel->first_occurrence?->pivot?->added_by ?? $track->added_by),
+                        ? ($trackModel->first_occurrence?->pivot?->added_by ?? $track->added_by)
+                        : $track->added_by,
                 ]
             );
         }
