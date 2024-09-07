@@ -49,9 +49,11 @@ class StorePlaylist implements ShouldQueue
 
         $playlistModel->tracks()->detach(); // Rebuild the playlist, syncing gets weird.
 
+        $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
+
         foreach ($playlist->tracks as $track) {
             $playlistModel->tracks()->attach(
-                $trackModel = tap(
+                tap(
                     Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name]),
                     fn (Track $trackModel) => $trackModel->artists()
                         ->sync(Arr::pluck(array_map(
@@ -61,12 +63,11 @@ class StorePlaylist implements ShouldQueue
                         ), 'id'))
                 ),
                 [
-                    'added_by' => $playlist->collaborative === true
+                    'added_by' => $matchFirstOccurrence
                         ? $track->added_by
                         : ($trackModel->first_occurrence?->pivot?->added_by ?? $track->added_by),
                 ]
             );
-
         }
     }
 }
