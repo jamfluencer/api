@@ -34,12 +34,11 @@ class StorePlaylist implements ShouldQueue
         }
 
         /** @var Playlist $playlistModel */
-        $playlistModel = Playlist::query()->updateOrCreate(
+        $playlistModel = Playlist::query()->firstOrNew(
             ['id' => $playlist->id],
             [
                 'name' => $playlist->name,
                 'url' => $playlist->url,
-                'snapshot' => $playlist->snapshot,
             ]
         );
 
@@ -47,7 +46,16 @@ class StorePlaylist implements ShouldQueue
             return; // Snapshot matches, no updates needed.
         }
 
-        $playlistModel->tracks()->detach(); // Rebuild the playlist, syncing gets weird.
+        // Rebuild the playlist, syncing gets weird.
+        tap(
+            $playlistModel,
+            fn () => $playlistModel
+                ->upsert(
+                    ['snapshot' => $playlist->snapshot] + $playlistModel->attributesToArray(),
+                    $playlistModel->getKeyName(),
+                    ['snapshot' => $playlist->snapshot]
+                )
+        )->tracks()->detach();
 
         $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
 

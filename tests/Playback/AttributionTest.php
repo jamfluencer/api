@@ -191,6 +191,6 @@ it('detaches previous tracks for update', function () {
     App::make(StorePlaylist::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $replaced->id])->handle();
 
     expect($replaced->tracks()->count())->toBe(3);
-})->only();
+});
 
 it('attributes the song when reporting', function () {})->todo();
