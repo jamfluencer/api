@@ -18,11 +18,11 @@ class Album extends Model
     public $incrementing = false;
 
     protected $table = 'spotify_albums';
-    
+
     protected $fillable = [
         'id',
         'name',
-        'uri'
+        'uri',
     ];
 
     public function tracks(): BelongsToMany

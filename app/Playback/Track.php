@@ -28,6 +28,7 @@ class Track extends Model
     protected $fillable = [
         'id',
         'name',
+        'url',
     ];
 
     public function playlists(): BelongsToMany
