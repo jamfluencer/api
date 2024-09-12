@@ -155,7 +155,8 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
-                    added_by: fake()->name()
+                    uri: fake()->url,
+                    added_by: fake()->name(),
                 ),
                 new Track(
                     name: $this->faker->name(),
@@ -166,7 +167,8 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
-                    added_by: fake()->name()
+                    uri: fake()->url,
+                    added_by: fake()->name(),
                 ),
                 new Track(
                     name: $this->faker->name(),
@@ -177,7 +179,8 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
-                    added_by: fake()->name()
+                    uri: fake()->url,
+                    added_by: fake()->name(),
                 ),
             ],
             totalTracks: count($tracks),

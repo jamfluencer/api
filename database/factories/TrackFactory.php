@@ -18,6 +18,7 @@ class TrackFactory extends Factory
         return [
             'id' => Str::random(),
             'name' => fake()->words(3, true),
+            'url' => fake()->url(),
         ];
     }
 }
