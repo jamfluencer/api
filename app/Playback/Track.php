@@ -31,6 +31,10 @@ class Track extends Model
         'url',
     ];
 
+    protected $appends = [
+        'album',
+    ];
+
     public function playlists(): BelongsToMany
     {
         return $this->belongsToMany(
