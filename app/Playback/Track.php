@@ -54,4 +54,14 @@ class Track extends Model
         return $this->belongsToMany(Artist::class, 'spotify_track_artists',
             'track_id', 'artist_id');
     }
+
+    public function album(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->albums->first());
+    }
+
+    public function albums(): BelongsToMany
+    {
+        return $this->belongsToMany(Album::class, 'spotify_album_tracks', 'track_id', 'album_id');
+    }
 }

@@ -28,6 +28,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -39,6 +40,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -50,6 +52,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -89,6 +92,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -100,6 +104,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -111,6 +116,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
+                            [],
                             []
                         ),
                         artists: [],
@@ -151,6 +157,7 @@ it('detaches previous tracks for update', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
+                        [],
                         []
                     ),
                     artists: [],
@@ -163,6 +170,7 @@ it('detaches previous tracks for update', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
+                        [],
                         []
                     ),
                     artists: [],
@@ -175,6 +183,7 @@ it('detaches previous tracks for update', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
+                        [],
                         []
                     ),
                     artists: [],

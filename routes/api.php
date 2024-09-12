@@ -3,6 +3,7 @@
 use App\Catalog\Requests\Search;
 use App\Http\Middleware\CheckJamMiddleware;
 use App\Models\User;
+use App\Playback\Album;
 use App\Playback\Artist;
 use App\Playback\Jobs\StorePlaylist;
 use App\Playback\Requests\Jam\Start;
@@ -183,12 +184,12 @@ Route::prefix('v1')->group(function () {
                     ->with(['playlists', 'artists'])
                     ->get()
                     ->toArray(),
-                //                'albums' => Artist::query()
-                //                    ->where('id', $request->validated('term'))
-                //                    ->orWhereLike('name', $request->validated('term'))
-                //                    ->with(['playlists'])
-                //                    ->get()
-                //                    ->toArray(),
+                'albums' => Album::query()
+                    ->where('id', $request->validated('term'))
+                    ->orWhereLike('name', $request->validated('term'))
+                    ->with(['tracks.playlists'])
+                    ->get()
+                    ->toArray(),
                 'artists' => Artist::query()
                     ->where('id', $request->validated('term'))
                     ->orWhereLike(DB::raw('lower(name)'), "%{$term}%")

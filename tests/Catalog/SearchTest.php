@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Playback\Album;
 use App\Playback\Artist;
 use App\Playback\Playlist;
 use App\Playback\Track;
@@ -78,6 +79,38 @@ describe('Searching by artist', function () {
 });
 
 describe('Searching by album', function () {
-    it('allows searching by name', function () {})->skip('Requires storing more Track information.');
-    it('allows searching by ID', function () {})->skip('Requires storing more Track information.');
+    it('allows searching by name', function () {
+        $track = Track::factory()
+            ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
+            ->hasAttached(Album::factory())
+            ->create();
+
+        $this->getJson("v1/catalog/search?term={$track->album->name}")
+            ->assertSuccessful()
+            ->assertJson(fn (AssertableJson $response) => $response
+                ->has(
+                    'albums',
+                    1,
+                    fn (AssertableJson $artists) => $artists
+                        ->where('id', $track->album->id)
+                        ->etc(/* It can be assumed that a matching ID identifies the entity. */)
+                ));
+    });
+    it('allows searching by ID', function () {
+        $track = Track::factory()
+            ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
+            ->hasAttached(Album::factory())
+            ->create();
+
+        $this->getJson("v1/catalog/search?term={$track->album->id}")
+            ->assertSuccessful()
+            ->assertJson(fn (AssertableJson $response) => $response
+                ->has(
+                    'albums',
+                    1,
+                    fn (AssertableJson $artists) => $artists
+                        ->where('id', $track->album->id)
+                        ->etc(/* It can be assumed that a matching ID identifies the entity. */)
+                ));
+    });
 });
