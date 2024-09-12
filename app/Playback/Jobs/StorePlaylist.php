@@ -61,7 +61,7 @@ class StorePlaylist implements ShouldQueue
 
         foreach ($playlist->tracks as $track) {
             $trackModel = tap(
-                Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name, 'url' => $track->uri]),
+                Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name, 'url' => $track->url]),
                 fn (Track $trackModel) => $trackModel->artists()
                     ->sync(Arr::pluck(array_map(
                         fn (Artist $artist) => ArtistModel::query()

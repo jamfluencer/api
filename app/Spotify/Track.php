@@ -14,7 +14,7 @@ readonly class Track
         public array $artists,
         //        public string $href,
         public string $id,
-        public ?string $uri = null,
+        public ?string $url = null,
         //        public bool $playable = true,
         //        Collection|array $markets = [],
         //        public ?int $disc = null,
@@ -43,7 +43,7 @@ readonly class Track
             artists: array_map(fn (array $artist) => new Artist(...$artist), $item['artists']),
             //            href: $item['href'],
             id: $item['id'],
-            uri: $item['external_urls']['spotify'] ?? null,
+            url: $item['external_urls']['spotify'] ?? null,
             added_by: $item['added_by']['id'] ?? null,
         );
     }

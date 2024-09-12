@@ -102,7 +102,7 @@ class Spotify
 
     public function playlist(string $id, bool $complete = false): ?Playlist
     {
-        $response = $this->http->get("/v1/playlists/{$id}?fields=id,snapshot_id,name,external_urls.spotify,images,collaborative,tracks(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,name,images,external_urls.spotify))))");
+        $response = $this->http->get("/v1/playlists/{$id}?fields=id,snapshot_id,name,external_urls(spotify),images,collaborative,tracks(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,name,images,external_urls(spotify)))))");
 
         if ($response->status() === Response::HTTP_NO_CONTENT) {
             return null;
