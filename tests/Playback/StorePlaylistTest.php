@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Playback\Album as AlbumModel;
 use App\Playback\Artist as ArtistModel;
 use App\Playback\Jobs\StorePlaylist as StorePlaylistJob;
 use App\Playback\Playlist as PlaylistModel;
@@ -8,6 +9,7 @@ use App\Playback\Track as TrackModel;
 use App\Spotify\Album;
 use App\Spotify\Artist;
 use App\Spotify\Facades\Spotify;
+use App\Spotify\Image;
 use App\Spotify\Playlist;
 use App\Spotify\Track;
 use Illuminate\Support\Facades\App;
@@ -51,7 +53,7 @@ it('associates the tracks', function () {
                     new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     [],
                     Str::random()
@@ -61,7 +63,7 @@ it('associates the tracks', function () {
                     new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     [],
                     Str::random()
@@ -71,7 +73,7 @@ it('associates the tracks', function () {
                     new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     [],
                     Str::random()
@@ -108,7 +110,7 @@ it('handles repeated tracks', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: $existingPlaylist->tracks->first()->id,
@@ -119,7 +121,7 @@ it('handles repeated tracks', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -130,7 +132,7 @@ it('handles repeated tracks', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -163,7 +165,7 @@ it('does not add all tracks again', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -174,7 +176,7 @@ it('does not add all tracks again', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -185,7 +187,7 @@ it('does not add all tracks again', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -218,7 +220,7 @@ it('stores track names', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -229,7 +231,7 @@ it('stores track names', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -240,7 +242,7 @@ it('stores track names', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
@@ -272,7 +274,7 @@ it('stores artists', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [
                         new Artist(
@@ -289,7 +291,7 @@ it('stores artists', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        []
+                        Str::random()
                     ),
                     artists: [
                         new Artist(...[
@@ -317,4 +319,49 @@ it('stores artists', function () {
     App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(ArtistModel::query()->count())->toBe(3);
+});
+
+it('stores album images', function () {
+    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
+    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
+        new Playlist(
+            name: $this->faker->name(),
+            id: $id,
+            images: [],
+            tracks: [
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        $album = Str::random(),
+                        $this->faker->name(),
+                        Str::random(),
+                        [
+                            new Image(
+                                fake()->url(),
+                                300,
+                                300
+                            ),
+                        ]
+                    ),
+                    artists: [
+                        new Artist(
+                            id: Str::random(),
+                            name: fake()->name(),
+                            uri: fake()->url(),
+                        ),
+                    ],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+            ],
+            totalTracks: 1,
+            next: '',
+            url: $this->faker->url(),
+            snapshot: Str::random()
+        )
+    );
+
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
+
+    expect(AlbumModel::query()->with('images')->find($album)->images)->toHaveCount(1);
 });

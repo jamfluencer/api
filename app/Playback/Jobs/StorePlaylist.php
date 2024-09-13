@@ -3,11 +3,13 @@
 namespace App\Playback\Jobs;
 
 use App\Models\User;
+use App\Playback\Album as AlbumModel;
 use App\Playback\Artist as ArtistModel;
 use App\Playback\Playlist;
 use App\Playback\Track;
 use App\Spotify\Artist;
 use App\Spotify\Facades\Spotify;
+use App\Spotify\Image;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -60,15 +62,26 @@ class StorePlaylist implements ShouldQueue
         $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
 
         foreach ($playlist->tracks as $track) {
-            $trackModel = tap(
-                Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name, 'url' => $track->url]),
-                fn (Track $trackModel) => $trackModel->artists()
-                    ->sync(Arr::pluck(array_map(
-                        fn (Artist $artist) => ArtistModel::query()
-                            ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
-                        $track->artists
-                    ), 'id'))
-            );
+            $trackModel = Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name, 'url' => $track->url]);
+            $trackModel->artists()
+                ->sync(Arr::pluck(array_map(
+                    fn (Artist $artist) => ArtistModel::query()
+                        ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
+                    $track->artists
+                ), 'id'));
+            $trackModel->albums()
+                ->sync(tap(
+                    AlbumModel::query()
+                        ->firstOrCreate(
+                            ['id' => $track->album->id],
+                            ['name' => $track->album->name, 'uri' => $track->album->uri]
+                        ),
+                    fn (AlbumModel $album) => collect($track->album->images)
+                        ->each(fn (Image $image) => $album->images()
+                            ->create(['url' => $image->url, 'width' => $image->width, 'height' => $image->height])
+                        )
+                ));
+
             $playlistModel->tracks()->attach(
                 $trackModel,
                 [
