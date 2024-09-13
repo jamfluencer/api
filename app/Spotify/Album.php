@@ -9,10 +9,11 @@ readonly class Album
     public function __construct(
         public string $id,
         public string $name,
+        public string $uri,
         array $images = [],
         array $external_urls = [],
         ...$args
     ) {
-        $this->images = array_map(fn (array $image) => new Image(...$image), $images);
+        $this->images = array_map(fn (Image|array $image) => $image::class === Image::class ? $image : new Image(...$image), $images);
     }
 }

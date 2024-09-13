@@ -28,8 +28,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: $repeatedTrack->id,
@@ -40,8 +39,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: Str::random(),
@@ -52,8 +50,7 @@ describe('For collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: Str::random(),
@@ -92,8 +89,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: $repeated->id,
@@ -104,8 +100,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: Str::random(),
@@ -116,8 +111,7 @@ describe('For Non-collaborative Playlists', function () {
                         album: new Album(
                             Str::random(),
                             $this->faker->name(),
-                            [],
-                            []
+                            Str::random()
                         ),
                         artists: [],
                         id: Str::random(),
@@ -157,39 +151,36 @@ it('detaches previous tracks for update', function () {
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        [],
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
-                    uri: fake()->url,
                     added_by: fake()->name(),
+                    uri: fake()->url,
                 ),
                 new Track(
                     name: $this->faker->name(),
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        [],
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
-                    uri: fake()->url,
                     added_by: fake()->name(),
+                    uri: fake()->url,
                 ),
                 new Track(
                     name: $this->faker->name(),
                     album: new Album(
                         Str::random(),
                         $this->faker->name(),
-                        [],
-                        []
+                        Str::random()
                     ),
                     artists: [],
                     id: Str::random(),
-                    uri: fake()->url,
                     added_by: fake()->name(),
+                    uri: fake()->url,
                 ),
             ],
             totalTracks: count($tracks),
