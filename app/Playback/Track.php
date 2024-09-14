@@ -62,7 +62,7 @@ class Track extends Model
 
     public function album(): Attribute
     {
-        return Attribute::make(get: fn () => $this->albums->first());
+        return Attribute::make(get: fn () => $this->albums->loadMissing('images')->first());
     }
 
     public function albums(): BelongsToMany
