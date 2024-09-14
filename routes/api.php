@@ -187,7 +187,7 @@ Route::prefix('v1')->group(function () {
                 'albums' => Album::query()
                     ->where('id', $request->validated('term'))
                     ->orWhereLike('name', $request->validated('term'))
-                    ->with(['tracks.playlists'])
+                    ->with(['tracks.playlists', 'images'])
                     ->get()
                     ->toArray(),
                 'artists' => Artist::query()

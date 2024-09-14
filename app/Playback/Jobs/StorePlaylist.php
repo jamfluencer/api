@@ -69,6 +69,7 @@ class StorePlaylist implements ShouldQueue
                         ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
                     $track->artists
                 ), 'id'));
+            /** @noinspection PhpParamsInspection */
             $trackModel->albums()
                 ->sync(tap(
                     AlbumModel::query()
