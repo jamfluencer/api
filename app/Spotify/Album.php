@@ -14,6 +14,8 @@ readonly class Album
         array $external_urls = [],
         ...$args
     ) {
-        $this->images = array_map(fn (Image|array $image) => $image::class === Image::class ? $image : new Image(...$image), $images);
+        $this->images = array_map(fn (Image|array $image) => is_array($image) === false && $image::class === Image::class
+            ? $image
+            : new Image(...$image), $images);
     }
 }
