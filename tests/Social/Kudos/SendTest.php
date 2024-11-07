@@ -35,22 +35,51 @@ it('allows for specifying the track', function () {
         ->and($account->load('kudos')->kudos->first()->track->id)->toBe($track->id);
 });
 
-it('returns not found without a track', function () {
+it('allows for an unknown track', function () {
+    Cache::put(
+        'jam',
+        [
+            'playlist' => Playlist::factory()
+                ->hasAttached(
+                    Track::factory()->create(),
+                    ['added_by' => $account = SpotifyAccount::factory()->create()->id]
+                )
+                ->create()->id,
+            'user' => $account,
+            'currently_playing' => $track = Str::random(),
+        ]
+    );
+
     $this->postJson('/v1/jam/kudos')
-        ->assertNotFound();
-    expect(Kudos::query()->count())->toBe(0);
+        ->assertAccepted();
+
+    expect(
+        Kudos::query()
+            ->whereHas(
+                'track',
+                fn (Builder $whereTrack) => $whereTrack->where('id', $track)
+            )
+            ->exists()
+    )->toBeTrue();
 });
 
-it('returns not found without a user', function () {
+it('allows for an unknown user', function () {
     $this->postJson(
         '/v1/jam/kudos',
         [
-            'track' => Track::factory()
+            'track' => $track = Track::factory()
                 ->hasAttached(Playlist::factory()->create())->create()->id,
         ]
     )
-        ->assertNotFound();
-    expect(Kudos::query()->count())->toBe(0);
+        ->assertAccepted();
+    expect(
+        Kudos::query()
+            ->whereHas(
+                'track',
+                fn (Builder $whereTrack) => $whereTrack->where('id', $track)
+            )
+            ->exists()
+    )->toBeTrue();
 });
 
 it('finds necessary information from cache', function () {
@@ -196,9 +225,57 @@ it('does not allow giving oneself kudos', function () {
 });
 
 it('throttles kudos', function () {
+    Cache::put(
+        'jam',
+        [
+            'playlist' => Playlist::factory()
+                ->hasAttached(
+                    $track = Track::factory()->create(),
+                    ['added_by' => $account = SpotifyAccount::factory()->create()->id]
+                )
+                ->create()->id,
+            'user' => $account,
+            'currently_playing' => $track->id,
+        ]
+    );
     $this->freezeTime();
-    $this->postJson('v1/jam/kudos')->assertNotFound();
+    $this->postJson('v1/jam/kudos')->assertAccepted();
     $this->postJson('v1/jam/kudos')->assertTooManyRequests();
     $this->travel(2)->minutes();
-    $this->postJson('v1/jam/kudos')->assertNotFound();
+    $this->postJson('v1/jam/kudos')->assertAccepted();
 });
+
+it('handles unrecognized Spotify accounts', function () {
+    Cache::put(
+        'jam',
+        [
+            'playlist' => $playlist = Playlist::factory()
+                ->hasAttached(
+                    $track = Track::factory()->create(),
+                    ['added_by' => Str::random()]
+                )
+                ->create()->id,
+            'user' => Str::random(),
+            'currently_playing' => $track->id,
+        ]
+    );
+
+    $this->withoutExceptionHandling()->postJson('/v1/jam/kudos')
+        ->assertAccepted();
+
+    expect(
+        Kudos::query()
+            ->whereHas(
+                'track',
+                fn (Builder $whereTrack) => $whereTrack->where('id', $track->id)
+            )
+            ->whereHas(
+                'playlist',
+                fn (Builder $wherePlaylist) => $wherePlaylist->where('id', $playlist)
+            )
+            ->whereDoesntHave('forSpotifyAccount')
+            ->exists()
+    )->toBeTrue();
+});
+
+it('returns not found for missing track', function () {})->todo();

@@ -146,7 +146,9 @@ Route::prefix('v1')->group(function () {
     Route::post('/jam/kudos', function (Store $request): JsonResponse {
         $kudos = Kudos::query()->make([
             'track_id' => ($track = Track::query()
-                ->find($request->validated('track', Arr::get(Cache::get('jam', fn () => []), 'currently_playing'))))
+                ->firstOrCreate([
+                    'id' => $request->validated('track', Arr::get(Cache::get('jam', fn () => []), 'currently_playing')),
+                ]))
                 ?->id,
             'playlist_id' => ($playlist = $track
                 ?->playlists()
@@ -157,10 +159,6 @@ Route::prefix('v1')->group(function () {
             'for_spotify_account_id' => $playlist?->pivot?->added_by,
             'from_user_id' => $request->user()?->id,
         ]);
-
-        if ($kudos->track_id === null || $kudos->for_spotify_account_id === null) {
-            return response()->json(status: Response::HTTP_NOT_FOUND);
-        }
 
         if ($request->user()?->spotifyAccounts()->where('display_name', $kudos->for_spotify_account_id)->exists()) {
             return response()->json(['message' => 'Good try though!'], Response::HTTP_PAYMENT_REQUIRED);
