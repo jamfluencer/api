@@ -16,12 +16,12 @@ readonly class AccessToken
 
     public function __construct(
         public string $token,
-        public string $refresh,
         DateTime|int $expiry,
-        string $scopes = ''
+        public ?string $refresh = null,
+        ?string $scopes = null
     ) {
         $this->type = 'Bearer';
-        $this->scopes = collect(explode(' ', $scopes));
+        $this->scopes = collect(explode(' ', $scopes ?? ''));
         $this->expiresAt = $expiry instanceof DateTime
             ? $expiry
             : (new DateTime)->add(new DateInterval("PT{$expiry}S"));
