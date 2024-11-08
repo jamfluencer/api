@@ -42,7 +42,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             'expires_at' => $token->expiresAt,
             'refresh' => $token->refresh,
         ]);
-        $account = Spotify::setToken($token)->profile();
+        $account = Spotify::setToken($token->forSpotify())->profile();
         tap(
             // TODO It should be first of any accounts, not just the user's
             $request->user()->spotifyAccounts()->firstOrCreate(
@@ -64,14 +64,14 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
-        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
+        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
             ->currentlyPlaying();
 
         return response()->json($track);
     })->middleware(CheckJamMiddleware::class);
 
     Route::get('/spotify/player/queue', function (): JsonResponse {
-        $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
+        $queue = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
             ->queue();
 
         return response()->json($queue);
@@ -79,7 +79,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/spotify/playlists/{id}', function (Request $request, string $id): JsonResponse {
         try {
-            $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
+            $playlist = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
                 ->playlist($id, $request->boolean('complete'));
         } catch (TypeError) {
             throw new RuntimeException('No Spotify authorization for user.');
@@ -93,7 +93,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No valid Spotify token for authenticated user.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $spotify = Spotify::setToken($request->user()->spotifyToken);
+        $spotify = Spotify::setToken($request->user()->spotifyToken->forSpotify());
         try {
             $track = $spotify->play($playlist);
         } catch (RequestException $exception) {
@@ -120,7 +120,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
             return response()->json(['message' => 'No valid Spotify token for authenticated user.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        Spotify::setToken($request->user()->spotifyToken)->pause();
+        Spotify::setToken($request->user()->spotifyToken->forSpotify())->pause();
 
         Cache::forget('jam');
 
@@ -137,7 +137,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     )->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 
     Route::get('/jam/queue', function () {
-        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken)
+        return response()->json(Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
             ->queue());
     })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 });

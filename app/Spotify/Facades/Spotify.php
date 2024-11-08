@@ -2,11 +2,11 @@
 
 namespace App\Spotify\Facades;
 
-use App\Playback\SpotifyToken;
+use App\Spotify\Authentication\AccessToken;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static \App\Spotify\Spotify setToken(SpotifyToken $token)
+ * @method static \App\Spotify\Spotify setToken(AccessToken $token)
  */
 class Spotify extends Facade
 {

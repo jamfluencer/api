@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Spotify;
+namespace App\Spotify\Authentication;
 
 use DateInterval;
 use DateTime;
 use Illuminate\Support\Collection;
+use Stringable;
 
-readonly class AccessToken
+readonly class AccessToken implements Stringable
 {
     public Collection $scopes;
 
@@ -17,7 +18,7 @@ readonly class AccessToken
     public function __construct(
         public string $token,
         DateTime|int $expiry,
-        public ?string $refresh = null,
+        public string $refresh,
         ?string $scopes = null
     ) {
         $this->type = 'Bearer';
@@ -30,5 +31,10 @@ readonly class AccessToken
     public function expired(): bool
     {
         return $this->expiresAt < new DateTime;
+    }
+
+    public function __toString(): string
+    {
+        return $this->token;
     }
 }

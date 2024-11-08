@@ -2,7 +2,7 @@
 
 namespace App\Playback;
 
-use App\Spotify\AccessToken;
+use App\Spotify\Authentication\AccessToken;
 use Database\Factories\SpotifyTokenFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

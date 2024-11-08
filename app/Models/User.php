@@ -16,6 +16,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @method static UserFactory factory($count = null, $state = [])
+ *
+ * @property-read SpotifyToken $spotifyToken
  */
 class User extends Authenticatable
 {

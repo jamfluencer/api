@@ -26,7 +26,7 @@ class PollJam implements ShouldQueue
 
         $user = User::query()->findOrFail(Arr::get(Cache::get('jam', []), 'user'));
 
-        $queue = Spotify::setToken($user->spotifyToken)->queue();
+        $queue = Spotify::setToken($user->spotifyToken->forSpotify())->queue();
 
         if ($queue === null) {
             Cache::forget('jam');
