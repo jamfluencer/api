@@ -26,9 +26,9 @@ class SpotifyToken extends Model
     {
         return new AccessToken(
             token: $this->token,
+            expiry: $this->expires_at,
             refresh: $this->refresh,
             scopes: $this->scope,
-            expiry: $this->expires_at,
         );
     }
 

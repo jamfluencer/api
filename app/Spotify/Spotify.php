@@ -60,8 +60,8 @@ class Spotify
 
         return new AccessToken(
             token: $response->json('access_token'),
-            refresh: $response->json('refresh_token'),
             expiry: $response->json('expires_in'),
+            refresh: $response->json('refresh_token'),
             scopes: $response->json('scope')
         );
     }
@@ -83,8 +83,8 @@ class Spotify
 
         return new AccessToken(
             token: $response->json('access_token'),
-            refresh: $response->json('refresh_token', $token->refresh),
             expiry: $response->json('expires_in'),
+            refresh: $response->json('refresh_token', $token->refresh),
             scopes: $response->json('scope')
         );
     }
