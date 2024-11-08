@@ -154,6 +154,33 @@ class Spotify
         return Queue::fromSpotify($response->json());
     }
 
+    public function withClientCredentials(): self
+    {
+        $this->client()->replaceHeaders(['Authorization' => 'Bearer '.$this->clientToken()]);
+
+        return $this;
+    }
+
+    protected function clientToken(): ClientToken
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ])
+            ->asForm()
+            ->post(
+                'https://accounts.spotify.com/api/token',
+                [
+                    'grant_type' => 'client_credentials',
+                ]
+            );
+
+        return new ClientToken(
+            $response->json('access_token'),
+            $response->json('expires_in')
+        );
+    }
+
     public function setToken(AccessToken|ClientToken $token): self
     {
         if ($token->expired()) {
