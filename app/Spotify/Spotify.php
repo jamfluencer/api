@@ -2,11 +2,14 @@
 
 namespace App\Spotify;
 
-use App\Playback\SpotifyToken;
+use App\Spotify\Authentication\AccessToken;
+use App\Spotify\Authentication\ClientToken;
+use App\Spotify\Authentication\RefreshToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 class Spotify
@@ -66,7 +69,7 @@ class Spotify
         );
     }
 
-    public function refreshToken(AccessToken $token): AccessToken
+    public function refreshToken(RefreshToken $token): AccessToken
     {
         $response = Http::withHeaders([
             'Authorization' => 'Basic '.base64_encode("{$this->id}:{$this->secret}"),
@@ -77,14 +80,14 @@ class Spotify
                 'https://accounts.spotify.com/api/token',
                 [
                     'grant_type' => 'refresh_token',
-                    'refresh_token' => $token->refresh,
+                    'refresh_token' => (string) $token,
                 ]
             );
 
         return new AccessToken(
             token: $response->json('access_token'),
             expiry: $response->json('expires_in'),
-            refresh: $response->json('refresh_token', $token->refresh),
+            refresh: $response->json('refresh_token', (string) $token),
             scopes: $response->json('scope')
         );
     }
@@ -151,14 +154,10 @@ class Spotify
         return Queue::fromSpotify($response->json());
     }
 
-    public function setToken(SpotifyToken $token): self
+    public function setToken(AccessToken|ClientToken $token): self
     {
-        if ($token->forSpotify()->expired()) {
-            $accessToken = Spotify::refreshToken($token->forSpotify());
-            $token->update([
-                'token' => $accessToken->token,
-                'refresh' => $accessToken->refresh,
-            ]);
+        if ($token->expired()) {
+            throw new RuntimeException('Token expired');
         }
 
         $this->client()->replaceHeaders(['Authorization' => "Bearer {$token->token}"]);

@@ -29,7 +29,7 @@ class StorePlaylist implements ShouldQueue
 
     public function handle(): void
     {
-        $playlist = Spotify::setToken($this->user->spotifyToken)->playlist($this->id, true);
+        $playlist = Spotify::setToken($this->user->spotifyToken->forSpotify())->playlist($this->id, true);
 
         if ($playlist === null) {
             $this->fail('Failed to retrieve playlist.');
