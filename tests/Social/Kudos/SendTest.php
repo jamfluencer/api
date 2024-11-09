@@ -5,9 +5,12 @@ use App\Playback\Playlist;
 use App\Playback\SpotifyAccount;
 use App\Playback\Track;
 use App\Social\Kudos;
+use App\Spotify\Jobs\ImportUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 
 beforeEach(fn () => Event::fake());
@@ -214,7 +217,7 @@ it('does not allow giving oneself kudos', function () {
                 'track' => Track::factory()
                     ->hasAttached(
                         Playlist::factory()->create(),
-                        ['added_by' => $cheater->spotifyAccounts->first()->display_name]
+                        ['added_by' => $cheater->spotifyAccounts->first()->id]
                     )
                     ->create()->id,
             ]
@@ -246,6 +249,8 @@ it('throttles kudos', function () {
 });
 
 it('handles unrecognized Spotify accounts', function () {
+    Queue::fake();
+
     Cache::put(
         'jam',
         [
@@ -278,4 +283,26 @@ it('handles unrecognized Spotify accounts', function () {
     )->toBeTrue();
 });
 
-it('returns not found for missing track', function () {})->todo();
+it('returns not found for missing track', function () {})->skip('Unsure if desired.');
+
+it('retrieves Spotify account information when missing', function () {
+    Queue::fake();
+
+    $this->postJson(
+        '/v1/jam/kudos',
+        [
+            'track' => Track::factory()
+                ->hasAttached(
+                    $playlist = Playlist::factory()->create(),
+                    ['added_by' => $id = Str::random()]
+                )
+                ->create()->id,
+            'playlist' => $playlist->id,
+        ]
+    )->assertSuccessful();
+
+    Queue::assertPushed(fn (ImportUser $job) => $id === tap(
+        (new ReflectionClass($job))->getProperty('id'),
+        fn (ReflectionProperty $playlistId) => $playlistId->setAccessible(true)
+    )->getValue($job));
+});
