@@ -41,5 +41,8 @@ Route::post('/auth/google', function (Request $request): JsonResponse {
             'email' => $google->getEmail(),
         ],
         ['email_verified_at' => now()]
-    ), fn (User $user) => $user->update(['name' => $google->getName()]))->createToken('api')->plainTextToken]);
+    ), fn (User $user) => $user->update([
+        'name' => $google->getName(),
+        'email_verified_at' => $user->email_verified_at ?? now(),
+    ]))->createToken('api')->plainTextToken]);
 })->withoutMiddleware(VerifyCsrfToken::class);
