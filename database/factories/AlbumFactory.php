@@ -24,6 +24,7 @@ class AlbumFactory extends Factory
             'id' => Str::random(),
             'name' => fake()->word(),
             'uri' => fake()->url(),
+            'link' => fake()->url(),
         ];
     }
 }

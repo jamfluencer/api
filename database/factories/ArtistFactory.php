@@ -23,6 +23,7 @@ class ArtistFactory extends Factory
             'id' => fake()->uuid(),
             'name' => fake()->name(),
             'uri' => fake()->url(),
+            'link' => fake()->url(),
         ];
     }
 }

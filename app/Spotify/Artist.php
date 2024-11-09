@@ -8,6 +8,7 @@ readonly class Artist
         public string $id,
         public string $name,
         public string $uri,
+        public array $external_urls,
         ...$args
     ) {}
 }

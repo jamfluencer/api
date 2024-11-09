@@ -76,6 +76,24 @@ describe('Searching by artist', function () {
                         ->etc(/* It can be assumed that a matching ID identifies the entity. */)
                 ));
     });
+    it('includes link to artist', function () {
+        $track = Track::factory()
+            ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
+            ->hasAttached(Artist::factory())
+            ->create();
+
+        $this->getJson("v1/catalog/search?term={$track->artists->first()->id}")
+            ->assertSuccessful()
+            ->assertJson(fn (AssertableJson $response) => $response
+                ->has(
+                    'artists',
+                    1,
+                    fn (AssertableJson $artists) => $artists
+                        ->where('id', $track->artists->first()->id)
+                        ->where('link', $track->artists->first()->link)
+                        ->etc(/* It can be assumed that a matching ID identifies the entity. */)
+                ));
+    });
 });
 
 describe('Searching by album', function () {
@@ -110,6 +128,24 @@ describe('Searching by album', function () {
                     1,
                     fn (AssertableJson $artists) => $artists
                         ->where('id', $track->album->id)
+                        ->etc(/* It can be assumed that a matching ID identifies the entity. */)
+                ));
+    });
+    it('includes link to album', function () {
+        $track = Track::factory()
+            ->hasAttached(Playlist::factory(), ['added_by' => User::factory()->create()->id])
+            ->hasAttached(Album::factory())
+            ->create();
+
+        $this->getJson("v1/catalog/search?term={$track->album->id}")
+            ->assertSuccessful()
+            ->assertJson(fn (AssertableJson $response) => $response
+                ->has(
+                    'albums',
+                    1,
+                    fn (AssertableJson $artists) => $artists
+                        ->where('id', $track->album->id)
+                        ->where('link', $track->album->link)
                         ->etc(/* It can be assumed that a matching ID identifies the entity. */)
                 ));
     });
