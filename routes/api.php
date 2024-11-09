@@ -16,6 +16,7 @@ use App\Social\Requests\Kudos\Store;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
+use App\Spotify\Jobs\ImportUser;
 use App\Spotify\Jobs\PollJam;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
@@ -160,8 +161,15 @@ Route::prefix('v1')->group(function () {
             'from_user_id' => $request->user()?->id,
         ]);
 
-        if ($request->user()?->spotifyAccounts()->where('display_name', $kudos->for_spotify_account_id)->exists()) {
+        if ($request->user()?->spotifyAccounts()->where('id', $kudos->for_spotify_account_id)->exists()) {
             return response()->json(['message' => 'Good try though!'], Response::HTTP_PAYMENT_REQUIRED);
+        }
+
+        if (
+            $kudos->for_spotify_account_id !== null
+            && SpotifyAccount::query()->where('id', $kudos->for_spotify_account_id)->doesntExist()
+        ) {
+            ImportUser::dispatch($kudos->for_spotify_account_id);
         }
 
         $kudos->save();
