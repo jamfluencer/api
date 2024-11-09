@@ -25,6 +25,7 @@ class Album extends Model
         'id',
         'name',
         'uri',
+        'link',
     ];
 
     public function tracks(): BelongsToMany

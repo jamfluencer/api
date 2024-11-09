@@ -66,7 +66,11 @@ class StorePlaylist implements ShouldQueue
             $trackModel->artists()
                 ->sync(Arr::pluck(array_map(
                     fn (Artist $artist) => ArtistModel::query()
-                        ->firstOrCreate(['id' => $artist->id], ['name' => $artist->name, 'uri' => $artist->uri]),
+                        ->firstOrCreate(['id' => $artist->id], [
+                            'name' => $artist->name,
+                            'uri' => $artist->uri,
+                            'link' => Arr::get($artist->external_urls, 'spotify'),
+                        ]),
                     $track->artists
                 ), 'id'));
             /** @noinspection PhpParamsInspection */
@@ -75,7 +79,11 @@ class StorePlaylist implements ShouldQueue
                     AlbumModel::query()
                         ->firstOrCreate(
                             ['id' => $track->album->id],
-                            ['name' => $track->album->name, 'uri' => $track->album->uri]
+                            [
+                                'name' => $track->album->name,
+                                'uri' => $track->album->uri,
+                                'link' => Arr::get($track->album->external_urls, 'spotify'),
+                            ]
                         ),
                     fn (AlbumModel $album) => collect($track->album->images)
                         ->each(fn (Image $image) => $album->images()

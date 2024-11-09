@@ -281,6 +281,7 @@ it('stores artists', function () {
                             id: Str::random(),
                             name: fake()->name(),
                             uri: fake()->url(),
+                            external_urls: [],
                         ),
                     ],
                     id: Str::random(),
@@ -298,11 +299,13 @@ it('stores artists', function () {
                             'name' => fake()->name(),
                             'id' => Str::random(),
                             'uri' => fake()->url(),
+                            'external_urls' => [],
                         ]),
                         new Artist(
                             id: Str::random(),
                             name: fake()->name(),
                             uri: fake()->url(),
+                            external_urls: [],
                         ),
                     ],
                     id: Str::random(),
@@ -348,6 +351,7 @@ it('stores album images', function () {
                             id: Str::random(),
                             name: fake()->name(),
                             uri: fake()->url(),
+                            external_urls: [],
                         ),
                     ],
                     id: Str::random(),
@@ -364,4 +368,104 @@ it('stores album images', function () {
     App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(AlbumModel::query()->with('images')->find($album)->images)->toHaveCount(1);
+});
+
+it('stores album links', function () {
+    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
+    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
+        new Playlist(
+            name: $this->faker->name(),
+            id: $id,
+            images: [],
+            tracks: [
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        Str::random(),
+                        [
+                            new Image(
+                                fake()->url(),
+                                300,
+                                300
+                            ),
+                        ],
+                        [
+                            'spotify' => $url = fake()->url(),
+                        ]
+                    ),
+                    artists: [
+                        new Artist(
+                            id: Str::random(),
+                            name: fake()->name(),
+                            uri: fake()->url(),
+                            external_urls: [],
+                        ),
+                    ],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+            ],
+            totalTracks: 1,
+            next: '',
+            url: $this->faker->url(),
+            snapshot: Str::random()
+        )
+    );
+
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
+
+    expect(AlbumModel::query()->where('link', $url)->exists())->toBeTrue();
+});
+
+it('stores artist links', function () {
+    Spotify::shouldReceive('setToken')->once()->andReturnSelf();
+    Spotify::shouldReceive('playlist')->once()->with($id = Str::random(), true)->andReturn(
+        new Playlist(
+            name: $this->faker->name(),
+            id: $id,
+            images: [],
+            tracks: [
+                new Track(
+                    name: $this->faker->name(),
+                    album: new Album(
+                        Str::random(),
+                        $this->faker->name(),
+                        Str::random(),
+                        [
+                            new Image(
+                                fake()->url(),
+                                300,
+                                300
+                            ),
+                        ],
+                        [
+                            'spotify' => fake()->url(),
+                        ]
+                    ),
+                    artists: [
+                        new Artist(
+                            id: Str::random(),
+                            name: fake()->name(),
+                            uri: fake()->url(),
+                            external_urls: [
+                                'spotify' => $url = fake()->url(),
+                            ]
+                        ),
+                    ],
+                    id: Str::random(),
+                    added_by: Str::random()
+                ),
+            ],
+            totalTracks: 1,
+            next: '',
+            url: $this->faker->url(),
+            snapshot: Str::random()
+        )
+    );
+
+    App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
+
+    expect(ArtistModel::query()->where('link', $url)->exists())->toBeTrue();
 });
