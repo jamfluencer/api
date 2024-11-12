@@ -133,7 +133,7 @@ class Spotify
     {
         $components = parse_url($playlistUrl);
         parse_str($components['query'] ?? '', $query);
-        $query['fields'] = 'next,items(added_by,track(id,name,artists,duration_ms,album(id,name,images)))';
+        $query['fields'] = 'next,items(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))))';
 
         return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
     }
