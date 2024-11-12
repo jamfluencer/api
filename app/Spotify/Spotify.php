@@ -135,7 +135,10 @@ class Spotify
         parse_str($components['query'] ?? '', $query);
         $query['fields'] = 'next,items(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))))';
 
-        return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
+        $calculatedUrl = URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
+        Log::debug("Next page: $calculatedUrl");
+
+        return $calculatedUrl;
     }
 
     public function profile(?string $id = null): Profile
@@ -213,5 +216,11 @@ class Spotify
     {
         return $this->http ??= Http::baseUrl(self::BASE_URL)
             ->throw();
+    }
+
+    private function albumFields(): string
+    {
+        return implode(',', ['id', 'uri', 'name', 'images', 'external_urls(spotify)']);
+        //        $itemFields = ['added_by','track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))
     }
 }
