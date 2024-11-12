@@ -111,7 +111,7 @@ class Spotify
         if ($response->status() === Response::HTTP_NO_CONTENT) {
             return null;
         }
-
+        Log::debug(json_encode($response->json(), JSON_PRETTY_PRINT));
         $playlist = Playlist::fromSpotify($response->json());
         while ($playlist->next && $complete) {
             $additional = $this->http->get(
@@ -221,6 +221,22 @@ class Spotify
     private function albumFields(): string
     {
         return implode(',', ['id', 'uri', 'name', 'images', 'external_urls(spotify)']);
-        //        $itemFields = ['added_by','track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))
+    }
+
+    private function itemFields(): string
+    {
+        $trackFields = implode(',', [
+            'id',
+            'name',
+            'artists',
+            'duration_ms',
+            'external_urls.spotify',
+            "album({$this->albumFields()})",
+        ]);
+
+        return implode(',', [
+            'added_by',
+            "track({$trackFields})",
+        ]);
     }
 }
