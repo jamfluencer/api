@@ -66,7 +66,9 @@ class StorePlaylist implements ShouldQueue
             $trackModel->artists()
                 ->sync(Arr::pluck(array_map(
                     fn (Artist $artist) => ArtistModel::query()
-                        ->firstOrCreate(['id' => $artist->id], [
+                        ->updateOrCreate(
+                            ['id' => $artist->id],
+                            [
                             'name' => $artist->name,
                             'uri' => $artist->uri,
                             'link' => Arr::get($artist->external_urls, 'spotify'),
