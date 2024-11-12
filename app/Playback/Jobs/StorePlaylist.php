@@ -69,10 +69,10 @@ class StorePlaylist implements ShouldQueue
                         ->updateOrCreate(
                             ['id' => $artist->id],
                             [
-                            'name' => $artist->name,
-                            'uri' => $artist->uri,
-                            'link' => Arr::get($artist->external_urls, 'spotify'),
-                        ]),
+                                'name' => $artist->name,
+                                'uri' => $artist->uri,
+                                'link' => Arr::get($artist->external_urls, 'spotify'),
+                            ]),
                     $track->artists
                 ), 'id'));
             /** @noinspection PhpParamsInspection */

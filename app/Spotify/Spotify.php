@@ -105,7 +105,7 @@ class Spotify
 
     public function playlist(string $id, bool $complete = false): ?Playlist
     {
-        $response = $this->http->get("/v1/playlists/{$id}?fields=id,snapshot_id,name,external_urls(spotify),images,collaborative,tracks(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))))");
+        $response = $this->http->get("/v1/playlists/{$id}");
 
         if ($response->status() === Response::HTTP_NO_CONTENT) {
             return null;
@@ -115,7 +115,7 @@ class Spotify
         while ($playlist->next && $complete) {
             $additional = $this->http->get(
                 Str::after(
-                    $this->trackUrlFromPlaylistUrl($playlist->next),
+                    $playlist->next,
                     self::BASE_URL)
             );
 
@@ -126,15 +126,6 @@ class Spotify
         }
 
         return $playlist;
-    }
-
-    private function trackUrlFromPlaylistUrl(string $playlistUrl): string
-    {
-        $components = parse_url($playlistUrl);
-        parse_str($components['query'] ?? '', $query);
-        $query['fields'] = 'next,items(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))))';
-
-        return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
     }
 
     public function profile(?string $id = null): Profile
@@ -212,27 +203,5 @@ class Spotify
     {
         return $this->http ??= Http::baseUrl(self::BASE_URL)
             ->throw();
-    }
-
-    private function albumFields(): string
-    {
-        return implode(',', ['id', 'uri', 'name', 'images', 'external_urls(spotify)']);
-    }
-
-    private function itemFields(): string
-    {
-        $trackFields = implode(',', [
-            'id',
-            'name',
-            'artists',
-            'duration_ms',
-            'external_urls.spotify',
-            "album({$this->albumFields()})",
-        ]);
-
-        return implode(',', [
-            'added_by',
-            "track({$trackFields})",
-        ]);
     }
 }
