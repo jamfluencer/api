@@ -77,7 +77,7 @@ class StorePlaylist implements ShouldQueue
             $trackModel->albums()
                 ->sync(tap(
                     AlbumModel::query()
-                        ->firstOrCreate(
+                        ->updateOrCreate(
                             ['id' => $track->album->id],
                             [
                                 'name' => $track->album->name,

@@ -7,7 +7,6 @@ use App\Spotify\Authentication\ClientToken;
 use App\Spotify\Authentication\RefreshToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -111,7 +110,7 @@ class Spotify
         if ($response->status() === Response::HTTP_NO_CONTENT) {
             return null;
         }
-        Log::debug(json_encode($response->json(), JSON_PRETTY_PRINT));
+
         $playlist = Playlist::fromSpotify($response->json());
         while ($playlist->next && $complete) {
             $additional = $this->http->get(
@@ -119,7 +118,7 @@ class Spotify
                     $this->trackUrlFromPlaylistUrl($playlist->next),
                     self::BASE_URL)
             );
-            Log::debug(json_encode($additional, JSON_PRETTY_PRINT));
+
             $playlist = $playlist->extend(
                 array_map(fn (array $track) => Track::fromSpotify($track), $additional->json('items', [])),
                 $additional->json('next')
@@ -135,10 +134,7 @@ class Spotify
         parse_str($components['query'] ?? '', $query);
         $query['fields'] = 'next,items(total,next,items(added_by,track(id,name,artists,duration_ms,external_urls.spotify,album(id,uri,name,images,external_urls(spotify)))))';
 
-        $calculatedUrl = URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
-        Log::debug("Next page: $calculatedUrl");
-
-        return $calculatedUrl;
+        return URL::fromComponents(array_merge($components, ['query' => http_build_query($query)]));
     }
 
     public function profile(?string $id = null): Profile
