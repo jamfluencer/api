@@ -7,6 +7,7 @@ use App\Spotify\Authentication\ClientToken;
 use App\Spotify\Authentication\RefreshToken;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -118,6 +119,7 @@ class Spotify
                     $this->trackUrlFromPlaylistUrl($playlist->next),
                     self::BASE_URL)
             );
+            Log::debug(json_encode($additional, JSON_PRETTY_PRINT));
             $playlist = $playlist->extend(
                 array_map(fn (array $track) => Track::fromSpotify($track), $additional->json('items', [])),
                 $additional->json('next')
