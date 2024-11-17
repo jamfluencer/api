@@ -3,6 +3,7 @@
 namespace App\Spotify\Jobs;
 
 use App\Models\User;
+use App\Playback\Playlist;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamUpdate;
 use App\Spotify\Facades\Spotify;
@@ -13,6 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class PollJam implements ShouldQueue
 {
@@ -26,20 +28,28 @@ class PollJam implements ShouldQueue
 
         $user = User::query()->findOrFail(Arr::get(Cache::get('jam', []), 'user'));
 
-        $queue = Spotify::setToken($user->spotifyToken->forSpotify())->queue();
+        $track = Spotify::setToken($user->spotifyToken->forSpotify())->currentlyPlaying();
 
-        if ($queue === null) {
+        if ($track === null) {
             Cache::forget('jam');
             JamEnded::broadcast();
 
             return;
         }
 
-        if ($queue->currently_playing?->id !== Arr::get(Cache::get('jam', []), 'currently_playing')) {
-            JamUpdate::dispatch(); // TODO Include if Playlist snapshot changed.
-            Cache::put('jam', array_merge(Cache::get('jam'), ['currently_playing' => $queue->currently_playing->id]));
-        }
+        $playlist = Str::afterLast($track->context?->uri ?? '', ':');
 
-        self::dispatch()->delay(now()->addSeconds(3));
+        JamUpdate::dispatchIf(
+            $track->id !== Arr::get(Cache::get('jam', []), 'currently_playing'),
+            true,
+            $playlist !== Arr::get(Cache::get('jam', []), 'playlist')
+            || Spotify::setToken($user->spotifyToken->forSpotify())->playlist($playlist)?->snapshot !== Playlist::query()->find($playlist)?->snapshot
+        );
+        Cache::put('jam', array_merge(Cache::get('jam'), [
+            'currently_playing' => $track->id,
+            'playlist' => $playlist,
+        ]));
+
+        self::dispatch()->delay(now()->addSeconds(5));
     }
 }

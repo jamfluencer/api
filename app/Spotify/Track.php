@@ -8,6 +8,8 @@ readonly class Track
 {
     public Collection $markets;
 
+    public ?Context $context;
+
     public function __construct(
         public string $name,
         public ?Album $album,
@@ -25,9 +27,13 @@ readonly class Track
         //        public ?string $upc = null,
         //        public ?string $spotifyUrl = null,
         public ?string $added_by = null,
+        ?array $context = null,
         ...$args
     ) {
         //        $this->markets = collect($markets);
+        if ($context) {
+            $this->context = new Context(...$context);
+        }
     }
 
     public static function fromSpotify(array $item): self

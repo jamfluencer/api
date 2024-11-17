@@ -12,6 +12,11 @@ class JamUpdate implements ShouldBroadcast
     use Dispatchable;
     use InteractsWithSockets;
 
+    public function __construct(
+        public bool $trackChanged = true,
+        public bool $playlistChanges = false
+    ) {}
+
     public function broadcastOn(): array
     {
         return [
