@@ -33,7 +33,7 @@ readonly class AttributedPlaylist
                     artists: $track->artists,
                     id: $track->id,
                     url: $track->url,
-                    added_by: Track::query()->find($track->id)->firstOccurrence->pivot->added_by,
+                    added_by: Track::query()->find($track->id)?->firstOccurrence?->pivot?->added_by ?? $track->added_by,
                 ),
                 $playlist->tracks
             ),
