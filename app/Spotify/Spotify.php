@@ -3,9 +3,12 @@
 namespace App\Spotify;
 
 use App\Spotify\Authentication\AccessToken;
+use App\Spotify\Authentication\ApiException;
 use App\Spotify\Authentication\ClientToken;
+use App\Spotify\Authentication\InvalidAuthorizationCode;
 use App\Spotify\Authentication\RefreshToken;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -60,6 +63,13 @@ class Spotify
                     'redirect_uri' => URL::to(config('spotify.redirect_uri')),
                 ]
             );
+
+        if ($response->failed()) {
+            match (Arr::get($response->json(), 'error')) {
+                'invalid_grant' => throw new InvalidAuthorizationCode,
+                default => throw new ApiException($response->json())
+            };
+        }
 
         return new AccessToken(
             token: $response->json('access_token'),
