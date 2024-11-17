@@ -5,6 +5,7 @@ use App\Http\Middleware\CheckJamMiddleware;
 use App\Models\User;
 use App\Playback\Album;
 use App\Playback\Artist;
+use App\Playback\AttributedPlaylist;
 use App\Playback\Jobs\StorePlaylist;
 use App\Playback\Requests\Jam\Start;
 use App\Playback\SpotifyAccount;
@@ -45,8 +46,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
         ]);
         $account = Spotify::setToken($token->forSpotify())->profile();
         tap(
-            // TODO It should be first of any accounts, not just the user's
-            $request->user()->spotifyAccounts()->firstOrCreate(
+            SpotifyAccount::query()->updateOrCreate(
                 [
                     'id' => $account->id,
 
@@ -54,6 +54,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
                 [
                     'display_name' => $account->display_name,
                     'country' => $account->country,
+                    'user_id' => $request->user()->id,
                 ]
             ),
             fn (SpotifyAccount $account) => $account->token()->delete())
@@ -133,7 +134,12 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get(
         '/jam/playlist',
         function () {
-            return redirect('/v1/spotify/playlists/'.Str::afterLast(Arr::get(Cache::get('jam', fn () => []), 'playlist'), ':').'?complete=true');
+            return response()->json(
+                AttributedPlaylist::attribution(
+                    Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
+                        ->playlist(Str::afterLast(Arr::get(Cache::get('jam', fn () => []), 'playlist'), ':'), true)
+                )
+            );
         }
     )->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 
