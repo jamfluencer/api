@@ -3,6 +3,7 @@
 namespace App\Playback;
 
 use App\Spotify\Playlist;
+use Illuminate\Support\Facades\DB;
 
 readonly class AttributedPlaylist
 {
@@ -33,7 +34,14 @@ readonly class AttributedPlaylist
                     artists: $track->artists,
                     id: $track->id,
                     url: $track->url,
-                    added_by: Track::query()->find($track->id)?->firstOccurrence?->pivot?->added_by ?? $track->added_by,
+                    added_by: DB::table('spotify_playlist_tracks')
+                        ->select('added_by')
+                        ->where([
+                            'spotify_playlist_tracks.playlist_id' => $playlist->id,
+                            'spotify_playlist_tracks.track_id' => $track->id,
+                        ])
+                        ->first()
+                        ?->added_by ?? $track->added_by,
                 ),
                 $playlist->tracks
             ),

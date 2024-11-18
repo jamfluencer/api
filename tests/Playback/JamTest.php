@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Playback\Album as AlbumModel;
 use App\Playback\Jobs\StorePlaylist;
 use App\Playback\Playlist as PlaylistModel;
 use App\Playback\Track as TrackModel;
@@ -26,46 +25,46 @@ describe('V1', function () {
         ]);
         $ryan = User::factory()->withSpotify()->create();
         $marshall = User::factory()->withSpotify()->create();
-        $ryanTrack = TrackModel::factory()
-            ->hasAttached(PlaylistModel::factory(), ['added_by' => $ryanSpotify = $ryan->spotifyAccounts()->sole()->id])
-            ->hasAttached(AlbumModel::factory())
-            ->create();
-        $marshallTrack = TrackModel::factory()
-            ->hasAttached(PlaylistModel::factory(), ['added_by' => $marshall->spotifyAccounts()->sole()->id])
-            ->hasAttached(AlbumModel::factory())
-            ->create();
+        $ryanSpotify = $ryan->spotifyAccounts()->sole()->id;
+        /** @var PlaylistModel $currentPlaylist */
+        $currentPlaylist = PlaylistModel::factory()->create();
+        $currentPlaylist->tracks()->sync([
+            ($trackOne = TrackModel::factory()->create())->id => ['added_by' => $ryanSpotify],
+            ($trackTwo = TrackModel::factory()->create())->id => ['added_by' => $marshall->spotifyAccounts()->sole()->id],
+            ($trackThree = TrackModel::factory()->create())->id => ['added_by' => $ryanSpotify],
+        ]);
         Spotify::shouldReceive('setToken')->andReturnSelf();
         Spotify::shouldReceive('playlist')->andReturn(new Playlist(
-            name: 'Playlist',
-            id: 'id',
+            name: $currentPlaylist->name,
+            id: $currentPlaylist->id,
             images: [],
             tracks: $tracks = [
                 new Track(
-                    name: 'Previously Added by Ryan',
+                    name: $trackOne->name,
                     album: null,
                     artists: [],
-                    id: $ryanTrack->id,
+                    id: $trackOne->id,
                     added_by: $ryanSpotify
                 ),
                 new Track(
-                    name: 'Previously Added by Marshall',
+                    name: $trackTwo->name,
                     album: null,
                     artists: [],
-                    id: $marshallTrack->id,
+                    id: $trackTwo->id,
                     added_by: $ryanSpotify,
                 ),
                 new Track(
-                    name: 'Newly Added by Ryan',
+                    name: $trackThree->name,
                     album: null,
                     artists: [],
-                    id: 'new',
+                    id: $trackThree->id,
                     added_by: $ryanSpotify,
                 ),
             ],
             totalTracks: count($tracks),
-            next: 'next',
-            url: '',
-            snapshot: 'snapshot'
+            next: null,
+            url: $currentPlaylist->url,
+            snapshot: $currentPlaylist->snapshot
         ));
 
         $this->get('v1/jam/playlist')
