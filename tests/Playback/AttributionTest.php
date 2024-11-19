@@ -32,6 +32,7 @@ describe('For collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: $repeatedTrack->id,
+                        duration_ms: 0,
                         added_by: fake()->name()
                     ),
                     new Track(
@@ -43,6 +44,7 @@ describe('For collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: Str::random(),
+                        duration_ms: 0,
                         added_by: fake()->name()
                     ),
                     new Track(
@@ -54,6 +56,7 @@ describe('For collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: Str::random(),
+                        duration_ms: 0,
                         added_by: fake()->name()
                     ),
                 ],
@@ -93,6 +96,7 @@ describe('For Non-collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: $repeated->id,
+                        duration_ms: 0,
                         added_by: $ryan = Str::random()
                     ),
                     new Track(
@@ -104,6 +108,7 @@ describe('For Non-collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: Str::random(),
+                        duration_ms: 0,
                         added_by: $ryan
                     ),
                     new Track(
@@ -115,6 +120,7 @@ describe('For Non-collaborative Playlists', function () {
                         ),
                         artists: [],
                         id: Str::random(),
+                        duration_ms: 0,
                         added_by: $ryan
                     ),
                 ],
@@ -155,6 +161,7 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: fake()->name(),
                     uri: fake()->url,
                 ),
@@ -167,6 +174,7 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: fake()->name(),
                     uri: fake()->url,
                 ),
@@ -179,6 +187,7 @@ it('detaches previous tracks for update', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: fake()->name(),
                     uri: fake()->url,
                 ),
