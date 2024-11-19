@@ -62,7 +62,13 @@ class StorePlaylist implements ShouldQueue
         $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
 
         foreach ($playlist->tracks as $track) {
-            $trackModel = Track::query()->updateOrCreate(['id' => $track->id], ['name' => $track->name, 'url' => $track->url]);
+            $trackModel = Track::query()->updateOrCreate(
+                ['id' => $track->id],
+                [
+                    'name' => $track->name,
+                    'url' => $track->url,
+                    'duration' => $track->duration_ms,
+                ]);
             $trackModel->artists()
                 ->sync(Arr::pluck(array_map(
                     fn (Artist $artist) => ArtistModel::query()

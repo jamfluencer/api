@@ -44,6 +44,7 @@ describe('V1', function () {
                     album: null,
                     artists: [],
                     id: $trackOne->id,
+                    duration_ms: 0,
                     added_by: $ryanSpotify
                 ),
                 new Track(
@@ -51,6 +52,7 @@ describe('V1', function () {
                     album: null,
                     artists: [],
                     id: $trackTwo->id,
+                    duration_ms: 0,
                     added_by: $ryanSpotify,
                 ),
                 new Track(
@@ -58,6 +60,7 @@ describe('V1', function () {
                     album: null,
                     artists: [],
                     id: $trackThree->id,
+                    duration_ms: 0,
                     added_by: $ryanSpotify,
                 ),
             ],

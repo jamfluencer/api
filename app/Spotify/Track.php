@@ -16,11 +16,12 @@ readonly class Track extends Item
         public array $artists,
         //        public string $href,
         public string $id,
+        public int $duration_ms,
         public ?string $url = null,
         //        public bool $playable = true,
         //        Collection|array $markets = [],
         //        public ?int $disc = null,
-        //        public ?int $duration = null,
+
         //        public bool|string $explicit = 'unknown',
         //        public ?string $irsc = null,
         //        public ?string $ean = null,
@@ -47,8 +48,8 @@ readonly class Track extends Item
             name: $item['name'],
             album: new Album(...$item['album']),
             artists: array_map(fn (array $artist) => new Artist(...$artist), $item['artists']),
-            //            href: $item['href'],
             id: $item['id'],
+            duration_ms: $item['duration_ms'],
             url: $item['external_urls']['spotify'] ?? null,
             added_by: $item['added_by']['id'] ?? null,
         );

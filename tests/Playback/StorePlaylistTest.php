@@ -56,7 +56,8 @@ it('associates the tracks', function () {
                         Str::random()
                     ),
                     [],
-                    Str::random()
+                    Str::random(),
+                    0
                 ),
                 new Track(
                     $this->faker->name(),
@@ -66,17 +67,19 @@ it('associates the tracks', function () {
                         Str::random()
                     ),
                     [],
-                    Str::random()
+                    Str::random(),
+                    0
                 ),
                 new Track(
                     $this->faker->name(),
                     new Album(
                         Str::random(),
                         $this->faker->name(),
-                        Str::random()
+                        Str::random(),
                     ),
                     [],
-                    Str::random()
+                    Str::random(),
+                    0
                 ),
             ],
             totalTracks: count($tracks),
@@ -114,6 +117,7 @@ it('handles repeated tracks', function () {
                     ),
                     artists: [],
                     id: $existingPlaylist->tracks->first()->id,
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -125,6 +129,7 @@ it('handles repeated tracks', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -136,6 +141,7 @@ it('handles repeated tracks', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],
@@ -149,7 +155,8 @@ it('handles repeated tracks', function () {
     App::make(StorePlaylistJob::class, ['user' => User::factory()->withSpotify()->create(), 'id' => $id])->handle();
 
     expect(PlaylistModel::query()->count())->toBe(2, 'Unexpected number of Playlists.')
-        ->and($existingPlaylist->tracks->first()->playlists()->count())->toBe(2, 'Track associated with incorrect number of Playlists.');
+        ->and($existingPlaylist->tracks->first()->playlists()->count())->toBe(2,
+            'Track associated with incorrect number of Playlists.');
 });
 
 it('does not add all tracks again', function () {
@@ -169,6 +176,7 @@ it('does not add all tracks again', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -180,6 +188,7 @@ it('does not add all tracks again', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -191,6 +200,7 @@ it('does not add all tracks again', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],
@@ -224,6 +234,7 @@ it('stores track names', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -235,6 +246,7 @@ it('stores track names', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -246,6 +258,7 @@ it('stores track names', function () {
                     ),
                     artists: [],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],
@@ -285,6 +298,7 @@ it('stores artists', function () {
                         ),
                     ],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
                 new Track(
@@ -309,6 +323,7 @@ it('stores artists', function () {
                         ),
                     ],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],
@@ -355,6 +370,7 @@ it('stores album images', function () {
                         ),
                     ],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],
@@ -395,6 +411,7 @@ it('stores album links', function () {
                             'spotify' => $url = fake()->url(),
                         ]
                     ),
+                    duration_ms: 0,
                     artists: [
                         new Artist(
                             id: Str::random(),
@@ -455,6 +472,7 @@ it('stores artist links', function () {
                         ),
                     ],
                     id: Str::random(),
+                    duration_ms: 0,
                     added_by: Str::random()
                 ),
             ],

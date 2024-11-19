@@ -33,6 +33,7 @@ readonly class AttributedPlaylist
                     album: $track->album,
                     artists: $track->artists,
                     id: $track->id,
+                    duration_ms: $track->duration_ms,
                     url: $track->url,
                     added_by: DB::table('spotify_playlist_tracks')
                         ->select('added_by')
