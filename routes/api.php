@@ -66,10 +66,10 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', fn (Request $request) => $request->user());
 
     Route::get('/spotify/player/track', function (): JsonResponse {
-        $track = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
+        $item = Spotify::setToken(User::query()->find(Arr::get(Cache::get('jam', fn () => []), 'user'))->spotifyToken->forSpotify())
             ->currentlyPlaying();
 
-        return response()->json($track);
+        return response()->json($item->item);
     })->middleware(CheckJamMiddleware::class);
 
     Route::get('/spotify/player/queue', function (): JsonResponse {

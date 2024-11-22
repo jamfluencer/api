@@ -28,25 +28,25 @@ class PollJam implements ShouldQueue
 
         $user = User::query()->findOrFail(Arr::get(Cache::get('jam', []), 'user'));
 
-        $track = Spotify::setToken($user->spotifyToken->forSpotify())->currentlyPlaying();
+        $currentlyPlaying = Spotify::setToken($user->spotifyToken->forSpotify())->currentlyPlaying();
 
-        if ($track === null) {
+        if ($currentlyPlaying === null) {
             Cache::forget('jam');
             JamEnded::broadcast();
 
             return;
         }
 
-        $playlist = Str::afterLast($track->context?->uri ?? '', ':');
+        $playlist = Str::afterLast($currentlyPlaying->context?->uri ?? '', ':');
 
         JamUpdate::dispatchIf(
-            $track->id !== Arr::get(Cache::get('jam', []), 'currently_playing'),
+            $currentlyPlaying->item->id !== Arr::get(Cache::get('jam', []), 'currently_playing'),
             true,
             $playlist !== Arr::get(Cache::get('jam', []), 'playlist')
             || Spotify::setToken($user->spotifyToken->forSpotify())->playlist($playlist)?->snapshot !== Playlist::query()->find($playlist)?->snapshot
         );
         Cache::put('jam', array_merge(Cache::get('jam'), [
-            'currently_playing' => $track->id,
+            'currently_playing' => $currentlyPlaying->item->id,
             'playlist' => $playlist,
         ]));
 

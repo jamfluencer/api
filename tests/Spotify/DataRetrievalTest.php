@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Spotify\Album;
+use App\Spotify\CurrentlyPlayingTrack;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Track;
 use Illuminate\Support\Facades\Cache;
@@ -12,16 +13,24 @@ it('proxies track information', function () {
         'user' => User::factory()->withSpotify()->create()->id,
     ]);
     Spotify::shouldReceive('setToken')->andReturnSelf();
-    Spotify::shouldReceive('currentlyPlaying')->andReturn(new Track(
-        name: 'track',
-        album: new Album(
-            id: '1',
-            name: 'album',
-            uri: ''
-        ),
-        artists: [],
-        id: '1'
+    Spotify::shouldReceive('currentlyPlaying')->andReturn(new CurrentlyPlayingTrack(
+        item: new Track(
+            name: 'track',
+            album: new Album(
+                id: '1',
+                name: 'album',
+                uri: ''
+            ),
+            artists: [],
+            id: '1'
 
+        ),
+        context: new \App\Spotify\Context(
+            '',
+            '',
+            [],
+            ''
+        )
     ));
     $this
         ->actingAs(User::factory()->create())

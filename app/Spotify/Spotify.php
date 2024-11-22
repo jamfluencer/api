@@ -102,7 +102,7 @@ class Spotify
         );
     }
 
-    public function currentlyPlaying(): ?Track
+    public function currentlyPlaying(): ?CurrentlyPlayingTrack
     {
         $response = $this->http->get('/v1/me/player/currently-playing');
 
@@ -110,7 +110,7 @@ class Spotify
             return null;
         }
 
-        return Track::fromSpotify($response->json('item', []) + ['context' => $response->json('context', [])]);
+        return CurrentlyPlayingTrack::fromSpotify($response->json());
     }
 
     public function playlist(string $id, bool $complete = false): ?Playlist

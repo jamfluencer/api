@@ -4,7 +4,7 @@ namespace App\Spotify;
 
 use Illuminate\Support\Collection;
 
-readonly class Track
+readonly class Track extends Item
 {
     public Collection $markets;
 
