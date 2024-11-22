@@ -110,7 +110,7 @@ class Spotify
             return null;
         }
 
-        return Track::fromSpotify($response->json('item', []));
+        return Track::fromSpotify($response->json('item', []) + ['context' => $response->json('context', [])]);
     }
 
     public function playlist(string $id, bool $complete = false): ?Playlist
