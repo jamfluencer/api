@@ -2,11 +2,13 @@
 
 namespace App\Playback;
 
+use App\Social\Kudos;
 use Database\Factories\TrackFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @method static TrackFactory factory($count = null, $state = [])
@@ -68,5 +70,10 @@ class Track extends Model
     public function albums(): BelongsToMany
     {
         return $this->belongsToMany(Album::class, 'spotify_album_tracks', 'track_id', 'album_id');
+    }
+
+    public function kudos(): HasMany
+    {
+        return $this->hasMany(Kudos::class, 'track_id');
     }
 }

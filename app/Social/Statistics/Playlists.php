@@ -16,10 +16,11 @@ class Playlists
                 'maximum' => $playlists->max('tracks_count'),
                 'minimum' => $playlists->min('tracks_count'),
             ],
+            // TODO Exclude the compilation albums.
             'duration' => [
-                'mean' => CarbonInterval::create(seconds: $playlists->avg(fn (Playlist $playlist) => $playlist->tracks->avg('duration'))/CarbonInterval::getMillisecondsPerSecond())->forHumans(),
-                'maximum' => CarbonInterval::create(seconds:$playlists->max(fn (Playlist $playlist) => $playlist->tracks->max('duration'))/CarbonInterval::getMillisecondsPerSecond())->forHumans(),
-                'minimum' => CarbonInterval::create(seconds:$playlists->min(fn (Playlist $playlist) => $playlist->tracks->min('duration'))/CarbonInterval::getMillisecondsPerSecond())->forHumans(),
+                'mean' => CarbonInterval::create(seconds: $playlists->avg(fn (Playlist $playlist) => $playlist->tracks->avg('duration')) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
+                'maximum' => CarbonInterval::create(seconds: $playlists->max(fn (Playlist $playlist) => $playlist->tracks->max('duration')) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
+                'minimum' => CarbonInterval::create(seconds: $playlists->min(fn (Playlist $playlist) => $playlist->tracks->min('duration')) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
             ],
         ];
     }
