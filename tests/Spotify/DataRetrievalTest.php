@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Spotify\Album;
+use App\Spotify\Context;
 use App\Spotify\CurrentlyPlayingTrack;
 use App\Spotify\Facades\Spotify;
 use App\Spotify\Track;
@@ -22,10 +23,11 @@ it('proxies track information', function () {
                 uri: ''
             ),
             artists: [],
-            id: '1'
+            id: '1',
+            duration_ms: 0
 
         ),
-        context: new \App\Spotify\Context(
+        context: new Context(
             '',
             '',
             [],
@@ -46,5 +48,6 @@ it('proxies track information', function () {
             ->where('id', '1')
             ->where('artists', [])
             ->where('url', null)
+            ->where('duration_ms', 0)
             ->where('added_by', null));
 });
