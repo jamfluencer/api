@@ -3,6 +3,7 @@
 namespace App\Playback;
 
 use Database\Factories\PlaylistFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,5 +46,13 @@ class Playlist extends Model
     public function artists(): BelongsToMany
     {
         return $this->belongsToMany(Artist::class);
+    }
+
+    public function kudos(): Attribute
+    {
+        $id = $this->id;
+        $sum = $this->tracks->sum(fn (Track $track) => $track->kudos()->count());
+
+        return new Attribute(get: fn () => $sum);
     }
 }
