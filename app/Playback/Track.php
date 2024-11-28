@@ -3,6 +3,7 @@
 namespace App\Playback;
 
 use App\Social\Kudos;
+use Carbon\CarbonInterval;
 use Database\Factories\TrackFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,6 +48,11 @@ class Track extends Model
         )
             ->withPivot('added_by')
             ->withTimestamps();
+    }
+
+    public function duration(): Attribute
+    {
+        return Attribute::make(get: fn ($value) => CarbonInterval::create(seconds: $value / CarbonInterval::getMillisecondsPerSecond())->forHumans());
     }
 
     public function firstOccurrence(): Attribute

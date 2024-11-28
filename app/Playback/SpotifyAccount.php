@@ -5,6 +5,7 @@ namespace App\Playback;
 use App\Models\User;
 use App\Social\Kudos;
 use Database\Factories\SpotifyAccountFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,11 @@ class SpotifyAccount extends Model
         'id',
         'display_name',
     ];
+
+    public function mappedDisplayName(): Attribute
+    {
+        return Attribute::make(get: fn () => "{$this->user->name} ({$this->display_name})");
+    }
 
     public function token(): HasOne
     {
