@@ -1,0 +1,15 @@
+meta {
+  name: Wrapped
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{v1}}/wrapped/{{code}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  code: d58aea7d-96ad-4302-bb7f-c3de6f3d53e2
+}

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Playback\Track;
+use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -19,6 +20,7 @@ class TrackFactory extends Factory
             'id' => Str::random(),
             'name' => fake()->words(3, true),
             'url' => fake()->url(),
+            'duration' => fake()->numberBetween(1, 10) * CarbonInterval::getMillisecondsPerSecond(),
         ];
     }
 }
