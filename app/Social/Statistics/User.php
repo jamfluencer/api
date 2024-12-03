@@ -40,53 +40,53 @@ class User
                                 ])
                                 ->orderBy('kudos_count', 'desc')->first())
                                 ?->toArray(),
-                            'kudos' => $mostAppreciated->kudos_count,
+                            'kudos' => $mostAppreciated?->kudos_count ?? 0,
                         ],
                         'mean' => round(Track::query()
-                        ->whereHas(
-                            'playlists', fn (Builder $playlistBuilder) => $playlistBuilder
-                                ->whereIn('spotify_playlist_tracks.added_by', $user->spotifyAccounts->pluck('id'))
-                        )
-                        ->withCount('kudos')
-                        ->get('kudos_count')
-                        ->avg('kudos_count'), 2),
+                            ->whereHas(
+                                'playlists', fn (Builder $playlistBuilder) => $playlistBuilder
+                                    ->whereIn('spotify_playlist_tracks.added_by', $user->spotifyAccounts->pluck('id'))
+                            )
+                            ->withCount('kudos')
+                            ->get('kudos_count')
+                            ->avg('kudos_count'), 2),
                     ],
                 ],
                 'jam' => [
-                'tracks' => [
-                    'count' => [
-                        'percentage' => round((($userTracks = Track::query()
-                            ->whereHas(
-                                'playlists', fn (Builder $playlistBuilder) => $playlistBuilder
-                                    ->whereIn('spotify_playlist_tracks.added_by',
-                                        $user->spotifyAccounts->pluck('id'))
-                            )->count()) / Track::query()->count()) * 100, 2),
-                        'total' => $userTracks,
-                    ],
-                    'duration' => [
-                        'percentage' => round(
-                            (($userDuration = CarbonInterval::create(seconds: Track::query()
+                    'tracks' => [
+                        'count' => [
+                            'percentage' => round((($userTracks = Track::query()
                                 ->whereHas(
-                                    'playlists',
-                                    fn (Builder $playlistBuilder) => $playlistBuilder
+                                    'playlists', fn (Builder $playlistBuilder) => $playlistBuilder
                                         ->whereIn('spotify_playlist_tracks.added_by',
                                             $user->spotifyAccounts->pluck('id'))
-                                )
-                                ->sum('duration') / CarbonInterval::getMillisecondsPerSecond()))
-                                ->totalSeconds / CarbonInterval::fromString(Arr::get((new Jam)(),
-                                    'duration'))->totalSeconds) * 100,
-                            2
-                        ),
-                        'total' => $userDuration->forHumans(),
+                                )->count()) / Track::query()->count()) * 100, 2),
+                            'total' => $userTracks,
+                        ],
+                        'duration' => [
+                            'percentage' => round(
+                                (($userDuration = CarbonInterval::create(seconds: Track::query()
+                                    ->whereHas(
+                                        'playlists',
+                                        fn (Builder $playlistBuilder) => $playlistBuilder
+                                            ->whereIn('spotify_playlist_tracks.added_by',
+                                                $user->spotifyAccounts->pluck('id'))
+                                    )
+                                    ->sum('duration') / CarbonInterval::getMillisecondsPerSecond()))
+                                    ->totalSeconds / CarbonInterval::fromString(Arr::get((new Jam)(),
+                                        'duration'))->totalSeconds) * 100,
+                                2
+                            ),
+                            'total' => $userDuration->forHumans(),
+                        ],
                     ],
+                    // TODO Exclude compilation lists
+                    'participation' => round((Playlist::query()
+                        ->whereHas('tracks', fn (Builder $trackBuilder) => $trackBuilder
+                            ->whereIn('spotify_playlist_tracks.added_by',
+                                $user->spotifyAccounts->pluck('id'))
+                        )->count() / Playlist::query()->count()) * 100, 2),
                 ],
-                // TODO Exclude compilation lists
-                'participation' => round((Playlist::query()
-                    ->whereHas('tracks', fn (Builder $trackBuilder) => $trackBuilder
-                        ->whereIn('spotify_playlist_tracks.added_by',
-                            $user->spotifyAccounts->pluck('id'))
-                    )->count() / Playlist::query()->count()) * 100, 2),
-            ],
             ]);
     }
 }

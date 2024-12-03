@@ -14,6 +14,10 @@ use App\Playback\Track;
 use App\Social\Events\Kudos as KudosEvent;
 use App\Social\Kudos;
 use App\Social\Requests\Kudos\Store;
+use App\Social\Statistics\Jam;
+use App\Social\Statistics\Playlists;
+use App\Social\Statistics\Social;
+use App\Social\Statistics\Tracks;
 use App\Spotify\Events\JamEnded;
 use App\Spotify\Events\JamStarted;
 use App\Spotify\Facades\Spotify;
@@ -149,7 +153,7 @@ Route::prefix('v1')->middleware(['auth:sanctum'])->group(function () {
     })->withoutMiddleware(['auth:sanctum'])->middleware(CheckJamMiddleware::class);
 });
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->group(callback: function () {
     Route::post('/jam/kudos', function (Store $request): JsonResponse {
         $kudos = Kudos::query()->make([
             'track_id' => ($track = Track::query()
@@ -184,6 +188,20 @@ Route::prefix('v1')->group(function () {
 
         return response()->json(status: Response::HTTP_ACCEPTED);
     })->middleware(['throttle:kudos']);
+
+    Route::get('/wrapped/{identifier}', function (string $identifier): JsonResponse {
+        return response()->json([
+            'jam' => (new Jam)(),
+            'playlists' => (new Playlists)(),
+            'tracks' => (new Tracks)(),
+            'you' => (new \App\Social\Statistics\User)(User::query()
+                ->join('wrapped_codes', 'users.id', '=', 'wrapped_codes.user_id')
+                ->where('wrapped_codes.code', $identifier)
+                ->sole()
+            ),
+            'social' => (new Social)(),
+        ]);
+    });
 
     Route::prefix('catalog')->group(function () {
         Route::get('search', function (Search $request): JsonResponse {
