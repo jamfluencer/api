@@ -26,9 +26,9 @@ class Playlists
                 ],
                 // TODO Exclude the compilation albums.
                 'duration' => [
-                    'mean' => CarbonInterval::create(seconds: $playlists->avg(fn (Playlist $playlist) => $playlist->tracks->avg(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
-                    'maximum' => CarbonInterval::create(seconds: $playlists->max(fn (Playlist $playlist) => $playlist->tracks->max(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
-                    'minimum' => CarbonInterval::create(seconds: $playlists->min(fn (Playlist $playlist) => $playlist->tracks->min(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
+                    'mean' => CarbonInterval::create(seconds: $playlists->avg(fn (Playlist $playlist) => $playlist->tracks->avg(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
+                    'maximum' => CarbonInterval::create(seconds: $playlists->max(fn (Playlist $playlist) => $playlist->tracks->max(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
+                    'minimum' => CarbonInterval::create(seconds: $playlists->min(fn (Playlist $playlist) => $playlist->tracks->min(fn (Track $track) => $track->getRawOriginal('duration'))) / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
                 ],
             ]);
     }

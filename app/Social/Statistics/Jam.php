@@ -21,7 +21,7 @@ class Jam
             fn () => [
                 'playlists' => Playlist::query()->count(),
                 'tracks' => Track::query()->count(),
-                'duration' => CarbonInterval::create(seconds: Track::query()->sum('duration') / CarbonInterval::getMillisecondsPerSecond())->forHumans(),
+                'duration' => CarbonInterval::create(seconds: Track::query()->sum('duration') / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
                 'contributors' => DB::table('spotify_playlist_tracks')->distinct('added_by')->count(),
             ]);
     }

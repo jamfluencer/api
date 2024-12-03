@@ -54,7 +54,7 @@ class Track extends Model
     public function duration(): Attribute
     {
         // TODO This was a bad idea, maybe return the CarbonInterval?
-        return Attribute::make(get: fn ($value) => CarbonInterval::create(seconds: $value / CarbonInterval::getMillisecondsPerSecond())->forHumans());
+        return Attribute::make(get: fn ($value) => CarbonInterval::create(seconds: $value / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans());
     }
 
     public function firstOccurrence(): Attribute

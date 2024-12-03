@@ -77,7 +77,7 @@ class User
                                         'duration'))->totalSeconds) * 100,
                                 2
                             ),
-                            'total' => $userDuration->forHumans(),
+                            'total' => $userDuration->cascade()->forHumans(),
                         ],
                     ],
                     // TODO Exclude compilation lists

@@ -20,7 +20,7 @@ class Tracks
             fn () => [
                 'count' => Track::query()->count(),
                 'duration' => [
-                    'mean' => Track::query()->avg('duration'),
+                    'mean' => CarbonInterval::create(seconds: Track::query()->avg('duration') / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
                     'maximum' => Track::query()->orderByDesc('duration')->first()->setVisible(['name', 'url', 'duration'])->toArray(),
                     'minimum' => Track::query()->orderBy('duration')->first()->setVisible(['name', 'url', 'duration'])->toArray(),
                 ],
