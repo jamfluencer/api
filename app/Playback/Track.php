@@ -32,6 +32,7 @@ class Track extends Model
         'id',
         'name',
         'url',
+        'duration',
     ];
 
     protected $appends = [
