@@ -21,12 +21,12 @@ class Tracks
                 'count' => Track::query()->count(),
                 'duration' => [
                     'mean' => CarbonInterval::create(seconds: Track::query()->avg('duration') / CarbonInterval::getMillisecondsPerSecond())->cascade()->forHumans(),
-                    'maximum' => Track::query()->orderByDesc('duration')->first()->setVisible(['name', 'url', 'duration'])->toArray(),
-                    'minimum' => Track::query()->orderBy('duration')->first()->setVisible(['name', 'url', 'duration'])->toArray(),
+                    'maximum' => Track::query()->orderByDesc('duration')->first()?->setVisible(['name', 'url', 'duration'])?->toArray(),
+                    'minimum' => Track::query()->orderBy('duration')->first()?->setVisible(['name', 'url', 'duration'])?->toArray(),
                 ],
                 'occurrence' => [
-                    'details' => ($track = Track::query()->withCount('playlists')->orderByDesc('playlists_count')->first())->setVisible(['name', 'url'])->toArray(),
-                    'playlists' => $track->playlists->each(fn (Playlist $playlist) => $playlist->setVisible(['name', 'url']))->toArray(),
+                    'details' => ($track = Track::query()->withCount('playlists')->orderByDesc('playlists_count')->first())?->setVisible(['name', 'url'])?->toArray(),
+                    'playlists' => $track?->playlists?->each(fn (Playlist $playlist) => $playlist->setVisible(['name', 'url']))?->toArray(),
                 ],
             ]
         );
