@@ -55,4 +55,13 @@ class Playlist extends Model
 
         return new Attribute(get: fn () => $sum);
     }
+
+    public function duration(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->tracks->sum(
+                fn (Track $track) => $track->getRawOriginal('duration')
+            ),
+        );
+    }
 }
