@@ -3,6 +3,7 @@
 namespace App\Playback;
 
 use Database\Factories\PlaylistFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * @property-read Collection<Track> $tracks
+ *
+ * @mixin Builder
  */
 class Playlist extends Model
 {
@@ -29,7 +32,15 @@ class Playlist extends Model
         'name',
         'url',
         'snapshot',
+        'ignored',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('ignore', function (Builder $builder) {
+            $builder->where((new self)->qualifyColumn('ignored'), false);
+        });
+    }
 
     public function tracks(): BelongsToMany
     {

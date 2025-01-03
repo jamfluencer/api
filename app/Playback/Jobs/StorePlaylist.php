@@ -48,6 +48,8 @@ class StorePlaylist implements ShouldQueue
             return; // Snapshot matches, no updates needed.
         }
 
+        $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
+
         // Rebuild the playlist, syncing gets weird.
         tap(
             $playlistModel,
@@ -55,11 +57,12 @@ class StorePlaylist implements ShouldQueue
                 ->upsert(
                     ['snapshot' => $playlist->snapshot] + $playlistModel->attributesToArray(),
                     $playlistModel->getKeyName(),
-                    ['snapshot' => $playlist->snapshot]
+                    [
+                        'snapshot' => $playlist->snapshot,
+                        'ignored' => $matchFirstOccurrence,
+                    ]
                 )
         )->tracks()->detach();
-
-        $matchFirstOccurrence = count(array_unique(Arr::pluck($playlist->tracks, 'added_by'))) === 1;
 
         foreach ($playlist->tracks as $track) {
             $trackModel = Track::query()->updateOrCreate(
