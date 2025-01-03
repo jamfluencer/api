@@ -81,7 +81,6 @@ class StorePlaylist implements ShouldQueue
                             ]),
                     $track->artists
                 ), 'id'));
-            /** @noinspection PhpParamsInspection */
             $trackModel->albums()
                 ->sync(tap(
                     AlbumModel::query()
