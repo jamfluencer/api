@@ -1,6 +1,9 @@
 <?php
 
 use App\Models\User;
+use App\Slack\Event\Handler;
+use App\Slack\Event\Type;
+use App\Slack\VerifySlackSignature;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +14,7 @@ Route::get('/', fn () => response()->json(['status' => 'OK']));
 
 Route::get(
     '/auth/google',
-    function (Request $request): JsonResponse {
+    static function (Request $request): JsonResponse {
         $request->validate([
             'redirect' => ['required', 'url'],
         ]);
@@ -46,3 +49,15 @@ Route::post('/auth/google', function (Request $request): JsonResponse {
         'email_verified_at' => $user->email_verified_at ?? now(),
     ]))->createToken('api')->plainTextToken]);
 })->withoutMiddleware(VerifyCsrfToken::class);
+
+Route::middleware([VerifySlackSignature::class])
+    ->prefix('/slack')
+    ->group(function () {
+        Route::post(
+            '/events',
+            fn (Request $request): JsonResponse => match (Type::tryFrom($request->json('type'))) {
+                Type::URL_VERIFICATION => response()->json(['challenge' => $request->json('challenge')]),
+                default => (new Handler)()
+            }
+        );
+    });
