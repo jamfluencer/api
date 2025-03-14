@@ -7,6 +7,7 @@ use App\Slack\VerifySlackSignature;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -56,7 +57,7 @@ Route::middleware([VerifySlackSignature::class])
         Route::post(
             '/events',
             fn (Request $request): JsonResponse => match (Type::tryFrom($request->json('type'))) {
-                Type::URL_VERIFICATION => response()->json(['challenge' => $request->json('challenge')]),
+                Type::URL_VERIFICATION => tap(response()->json(['challenge' => $request->json('challenge')]), fn (JsonResponse $r) => Log::error($r->getContent())),
                 default => (new Handler)()
             }
         );
