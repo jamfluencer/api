@@ -60,4 +60,5 @@ Route::middleware([VerifySlackSignature::class])
                 default => (new Handler)()
             }
         );
-    });
+    })
+    ->withoutMiddleware(VerifyCsrfToken::class);
