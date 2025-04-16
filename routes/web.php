@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Slack\Event\Envelope;
 use App\Slack\Event\Handler;
 use App\Slack\Event\Type;
 use App\Slack\VerifySlackSignature;
@@ -55,10 +56,9 @@ Route::middleware([VerifySlackSignature::class])
     ->group(function () {
         Route::post(
             '/events',
-            fn (Request $request): JsonResponse => match (Type::tryFrom($request->json('type'))) {
-                Type::URL_VERIFICATION => response()->json(['challenge' => $request->json('challenge')]),
-                default => (new Handler)()
+            fn (Envelope $envelope): JsonResponse => match ($envelope->type) {
+                Type::URL_VERIFICATION => response()->json(['challenge' => $envelope->challenge]),
+                default => (new Handler)($envelope->event)
             }
-        );
-    })
-    ->withoutMiddleware(VerifyCsrfToken::class);
+        )->withoutMiddleware(VerifyCsrfToken::class);
+    });

@@ -17,6 +17,7 @@ class VerifySlackSignature
         $signature = $request->header('x-slack-signature', $request->header('X-Slack-Signature'));
         if (! $signature) {
             Log::alert('No valid signature header');
+
             return $this->reject();
         }
         $timestamp = $request->header('X-Slack-Request-Timestamp', $request->header('x-slack-request-timestamp'));
@@ -35,6 +36,7 @@ class VerifySlackSignature
 
         if (hash_equals($signature, "{$version}={$digest}") === false) {
             Log::alert("Invalid signature - {$signature} !== {$version}={$digest}");
+
             return $this->reject();
         }
 
