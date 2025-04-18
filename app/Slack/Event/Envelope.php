@@ -2,7 +2,6 @@
 
 namespace App\Slack\Event;
 
-use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\EnumCast;
@@ -26,7 +25,7 @@ class Envelope extends Data
         #[MapInputName('event_id')]
         public Optional|string $id,
         #[MapInputName('event_time')]
-        public Optional|Carbon $time,
+        public Optional|int $time,
         #[WithCast(EventCast::class)]
         public Optional|Details $event,
         public Optional|string|null $challenge = null

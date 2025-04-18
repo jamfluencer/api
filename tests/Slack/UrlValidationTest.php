@@ -4,7 +4,7 @@ use App\Slack\VerifySlackSignature;
 use Illuminate\Testing\Fluent\AssertableJson;
 
 it('returns challenge', function () {
-    $this->withoutMiddleware(VerifySlackSignature::class)->postJson(
+    test()->withoutMiddleware(VerifySlackSignature::class)->postJson(
         '/slack/events',
         $payload = [
             'token' => 'Jhj5dZrVaK7ZwHHjRyZWjbDl',
