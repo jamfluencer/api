@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Providers;
+namespace App\Spotify;
 
-use App\Spotify\Spotify;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 
-class SpotifyServiceProvider extends ServiceProvider implements DeferrableProvider
+class Provider extends ServiceProvider implements DeferrableProvider
 {
     public function register(): void
     {
-        $this->app->bind('spotify', fn () => new Spotify(
+        $this->app->alias(Spotify::class, 'spotify');
+        $this->app->bind(Spotify::class, fn () => new Spotify(
             id: config('spotify.id'),
             secret: config('spotify.secret'),
         ));
@@ -18,6 +18,9 @@ class SpotifyServiceProvider extends ServiceProvider implements DeferrableProvid
 
     public function provides(): array
     {
-        return ['spotify'];
+        return [
+            'spotify',
+            Spotify::class,
+        ];
     }
 }
