@@ -4,8 +4,11 @@ namespace App\Slack\Services\Views\Responses;
 
 use App\Slack\Response;
 use App\Slack\View\Data;
+use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Optional;
 
+#[MapInputName(SnakeCaseMapper::class)]
 class Publish extends Response
 {
     public function __construct(
