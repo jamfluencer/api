@@ -29,7 +29,7 @@ class Service implements ServiceInterface
             'views.publish',
             [
                 'user_id' => $id,
-                'view' => $view,
+                'view' => $view->except('verbatim'),
             ]
         )->json());
     }
