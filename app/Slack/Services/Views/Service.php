@@ -28,7 +28,7 @@ class Service implements ServiceInterface
         return Publish::from($this->slack->client()->post(
             'views.publish',
             [
-                'view_id' => $id,
+                'user_id' => $id,
                 'view' => $view,
             ]
         )->json());
