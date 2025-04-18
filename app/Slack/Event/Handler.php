@@ -3,9 +3,11 @@
 namespace App\Slack\Event;
 
 use App\Slack\Block\Type as BlockType;
+use App\Slack\Services\Views\Responses\Publish;
 use App\Slack\View\Data as View;
 use App\Slack\View\Type as ViewType;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Handler
@@ -28,7 +30,8 @@ class Handler
 
     private function appHomeOpened(AppHomeOpened $event): void
     {
-        app('slack')->views()->publish(
+        /** @var Publish $response */
+        $response = app('slack')->views()->publish(
             'UTZ2VAYNB',
             View::from([
                 'type' => ViewType::HOME->value,
@@ -44,5 +47,9 @@ class Handler
                 ],
             ])
         );
+
+        if ($response->ok === false) {
+            Log::alert("Home tab failed to publish: {$response->error}");
+        }
     }
 }
