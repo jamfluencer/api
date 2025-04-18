@@ -49,7 +49,7 @@ class Handler
         );
 
         if ($response->ok === false) {
-            Log::alert("Home tab failed to publish: {$response->error}");
+            Log::alert("Home tab failed to publish: {$response->error} - {$response->responseMetadata}");
         }
     }
 }

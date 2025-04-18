@@ -12,7 +12,8 @@ class Publish extends Response
         public bool $ok,
         public Optional|string $error,
         public Optional|string $warning,
-        public Optional|Data $view
+        public Optional|Data $view,
+        public Optional|string $responseMetadata
     ) {
         parent::__construct($ok, $error, $warning);
     }
