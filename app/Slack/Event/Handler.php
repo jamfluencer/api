@@ -50,7 +50,7 @@ class Handler
 
         if ($response->ok === false) {
             $meta = json_encode($response->responseMetadata);
-            Log::alert("Home tab failed to publish: {$response->error} - {$response->responseMetadata}");
+            Log::alert("Home tab failed to publish: {$response->error} - {$meta}");
         }
     }
 }
