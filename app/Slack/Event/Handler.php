@@ -32,7 +32,7 @@ class Handler
     {
         /** @var Publish $response */
         $response = app('slack')->views()->publish(
-            'UTZ2VAYNB',
+            $event->user,
             View::from([
                 'type' => ViewType::HOME->value,
                 'blocks' => [
@@ -43,6 +43,50 @@ class Handler
                             'text' => 'We :heart: the Jam',
                             'emoji' => true,
                         ],
+                    ],
+                    [
+                        'type' => BlockType::SECTION->value,
+                        'text' => [
+                            'type' => 'plain_text',
+                            'text' => 'The Jam is a collaborative music listening experience. Everyone adds tracks to a shared playlist and then enjoy the chaos together in a Spotify Jam!',
+                            'emoji' => true,
+                        ],
+                    ],
+                    [
+                        'type' => BlockType::DIVIDER->value,
+                    ],
+                    [
+                        'type' => BlockType::HEADER->value,
+                        'text' => [
+                            'type' => 'plain_text',
+                            'text' => 'Current Jam',
+                            'emoji' => true,
+                        ],
+                    ],
+                    [
+                        'type' => BlockType::SECTION->value,
+                        'text' => [
+                            'type' => 'plain_text',
+                            'text' => 'This playlist is 0% complete.',
+                            'emoji' => true,
+                        ],
+                    ],
+                    [
+                        'type' => BlockType::SECTION->value,
+                        'text' => [
+                            'type' => 'mrkdwn',
+                            'text' => 'The current Jam playlist is building!',
+                        ],
+                        'accessory' => [
+                            'type' => 'button',
+                            'text' => [
+                                'type' => 'plain_text',
+                                'text' => 'See the Playlist',
+                                'emoji' => true,
+                            ],
+                            'url' => 'https=>//google.com',
+                        ],
+
                     ],
                 ],
             ])

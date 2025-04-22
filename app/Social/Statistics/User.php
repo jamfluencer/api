@@ -80,7 +80,6 @@ class User
                             'total' => $userDuration->cascade()->forHumans(),
                         ],
                     ],
-                    // TODO Exclude compilation lists
                     'participation' => round((Playlist::query()
                         ->whereHas('tracks', fn (Builder $trackBuilder) => $trackBuilder
                             ->whereIn('spotify_playlist_tracks.added_by',
