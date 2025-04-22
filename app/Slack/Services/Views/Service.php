@@ -7,6 +7,7 @@ use App\Slack\Services\Service as ServiceInterface;
 use App\Slack\Services\Views\Responses\Publish;
 use App\Slack\Slack;
 use App\Slack\View\Data;
+use Illuminate\Support\Facades\Log;
 
 class Service implements ServiceInterface
 {
@@ -25,12 +26,12 @@ class Service implements ServiceInterface
 
     public function publish(string $id, Data $view): Publish
     {
-        return Publish::from($this->slack->client()->post(
+        return Publish::from(tap($this->slack->client()->post(
             'views.publish',
             [
                 'user_id' => $id,
                 'view' => $view->except('blocks.text.verbatim'),
             ]
-        )->json());
+        ), fn (\Illuminate\Http\Client\Response $response) => Log::debug($response->json()))->json());
     }
 }
