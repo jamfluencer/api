@@ -84,7 +84,7 @@ class Handler
                                 'text' => 'See the Playlist',
                                 'emoji' => true,
                             ],
-                            'url' => 'https=>//google.com',
+                            'url' => 'https://google.com',
                         ],
 
                     ],
