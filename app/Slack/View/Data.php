@@ -24,7 +24,6 @@ class Data extends LaravelData
         public Optional|string|null $submit,
         #[DataCollectionOf(Block::class)]
         public DataCollection $blocks,
-        public Optional|string $privateMetadata,
         public Optional|string $callbackId,
         public Optional|State $state,
         public Optional|string $hash,
@@ -33,6 +32,7 @@ class Data extends LaravelData
         public Optional|string $rootViewId,
         public Optional|string $appId,
         public Optional|string $externalId,
-        public Optional|string $botId
+        public Optional|string $botId,
+        public Optional|string|null $privateMetadata = null,
     ) {}
 }
