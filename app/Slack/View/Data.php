@@ -4,7 +4,7 @@ namespace App\Slack\View;
 
 use App\Slack\Block\Data as Block;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
-use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Casts\EnumCast;
 use Spatie\LaravelData\Data as LaravelData;
@@ -12,7 +12,7 @@ use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Optional;
 
-#[MapInputName(SnakeCaseMapper::class)]
+#[MapName(SnakeCaseMapper::class)]
 class Data extends LaravelData
 {
     public function __construct(
@@ -20,19 +20,19 @@ class Data extends LaravelData
         public Optional|string $teamId,
         #[WithCast(EnumCast::class)]
         public Type $type,
-        public Optional|string|null $close = null,
-        public Optional|string|null $submit = null,
+        public Optional|string $close,
+        public Optional|string $submit,
         #[DataCollectionOf(Block::class)]
         public DataCollection $blocks,
-        public Optional|string|null $callbackId = null,
-        public Optional|State|null $state = null,
-        public Optional|string|null $hash = null,
-        public Optional|bool|null $clearOnClose = null,
-        public Optional|bool|null $notifyOnClose = null,
-        public Optional|string|null $rootViewId = null,
-        public Optional|string|null $appId = null,
-        public Optional|string|null $externalId = null,
-        public Optional|string|null $botId = null,
-        public Optional|string|null $privateMetadata = null,
+        public Optional|string $callbackId,
+        public Optional|State $state,
+        public Optional|string $hash,
+        public Optional|bool $clearOnClose,
+        public Optional|bool $notifyOnClose,
+        public Optional|string $rootViewId,
+        public Optional|string $appId,
+        public Optional|string $externalId,
+        public Optional|string $botId,
+        public string $privateMetadata = '',
     ) {}
 }
