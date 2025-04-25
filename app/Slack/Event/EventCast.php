@@ -2,6 +2,7 @@
 
 namespace App\Slack\Event;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\LaravelData\Casts\Cast;
 use Spatie\LaravelData\Casts\Uncastable;
@@ -20,6 +21,7 @@ class EventCast implements Cast
             return Uncastable::create();
         }
 
+        Log::debug("Creating a {$class} from ".json_encode($value));
         return $class::from($value);
     }
 }
