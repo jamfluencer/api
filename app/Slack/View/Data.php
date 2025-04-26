@@ -20,19 +20,20 @@ class Data extends LaravelData
         public Optional|string $teamId,
         #[WithCast(EnumCast::class)]
         public Type $type,
-        public Optional|string $close,
-        public Optional|string $submit,
+        public Optional|string|null $close,
+        public Optional|string|null $submit,
         #[DataCollectionOf(Block::class)]
         public DataCollection $blocks,
-        public Optional|string $callbackId,
+        public Optional|string|null $callbackId,
         public Optional|State $state,
         public Optional|string $hash,
         public Optional|bool $clearOnClose,
         public Optional|bool $notifyOnClose,
+        public Optional|string|null $previousViewId,
         public Optional|string $rootViewId,
         public Optional|string $appId,
-        public Optional|string $externalId,
+        public Optional|string|null $externalId,
         public Optional|string $botId,
-        public string $privateMetadata = '',
+        public Optional|string|null $privateMetadata,
     ) {}
 }
